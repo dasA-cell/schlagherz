@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6e5123"/>
+      <stop offset="1" stop-color="#24170d"/>
+    </linearGradient>
+    <radialGradient id="lamp" cx="50%" cy="40%" r="55%">
+      <stop offset="0" stop-color="#ffe8b6"/>
+      <stop offset="0.45" stop-color="#ffb347"/>
+      <stop offset="1" stop-color="#8d4e17"/>
+    </radialGradient>
+  </defs>
+  <rect x="22" y="22" width="468" height="468" rx="74" fill="url(#bg)" stroke="#d3ae62" stroke-width="14"/>
+  <rect x="72" y="72" width="368" height="94" rx="18" fill="#1a120c" stroke="#b48a46" stroke-width="4"/>
+  <g fill="url(#lamp)">
+    <rect x="72" y="210" width="48" height="48" rx="10"/>
+    <rect x="136" y="210" width="48" height="48" rx="10"/>
+    <rect x="200" y="210" width="48" height="48" rx="10"/>
+    <rect x="264" y="210" width="48" height="48" rx="10"/>
+    <rect x="328" y="210" width="48" height="48" rx="10"/>
+    <rect x="392" y="210" width="48" height="48" rx="10"/>
+    <rect x="72" y="274" width="48" height="48" rx="10"/>
+    <rect x="136" y="274" width="48" height="48" rx="10"/>
+    <rect x="200" y="274" width="48" height="48" rx="10"/>
+    <rect x="264" y="274" width="48" height="48" rx="10"/>
+    <rect x="328" y="274" width="48" height="48" rx="10"/>
+    <rect x="392" y="274" width="48" height="48" rx="10"/>
+  </g>
+  <circle cx="136" cy="398" r="34" fill="#c89a50" stroke="#e4c078" stroke-width="6"/>
+  <circle cx="256" cy="398" r="34" fill="#c89a50" stroke="#e4c078" stroke-width="6"/>
+  <circle cx="376" cy="398" r="34" fill="#c89a50" stroke="#e4c078" stroke-width="6"/>
+</svg>
