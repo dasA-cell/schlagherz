@@ -1,23 +1,13 @@
 {
   "name": "SCHLAGHERZ – Poetische Rhythmusmaschine",
   "short_name": "Schlagherz",
-  "start_url": "./index.html?v=2",
+  "start_url": "./index.html?v=3",
   "display": "standalone",
   "background_color": "#040504",
   "theme_color": "#050705",
   "lang": "de",
   "icons": [
-    {
-      "src": "icon-192.svg?v=2",
-      "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "icon-512.svg?v=2",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    }
+    {"src": "icon-192.svg?v=3", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any"},
+    {"src": "icon-512.svg?v=3", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any"}
   ]
 }
