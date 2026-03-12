@@ -1,354 +1,87 @@
 <!doctype html>
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
-  <title>SCHLAGHERZ – Poetische Rhythmusmaschine</title>
-  <meta name="theme-color" content="#050705" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Schlagherz" />
-  <link rel="manifest" href="manifest.webmanifest?v=2" />
-  <link rel="icon" href="icon-192.svg?v=2" type="image/svg+xml" />
-  <style>
-    :root{
-      --bg:#040504;
-      --bg2:#0b0f0b;
-      --panel:#090c09;
-      --panel2:#0f1410;
-      --line:#273428;
-      --line2:#3d5340;
-      --text:#f3f7f3;
-      --muted:#bcc7bc;
-      --green:#7cff9a;
-      --green2:#35cf61;
-      --green3:#12361d;
-      --glass:rgba(124,255,154,.06);
-      --shadow:rgba(0,0,0,.48);
-      --warn:#d3ff9d;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+<title>SCHLAGHERZ – Poetische Rhythmusmaschine</title>
+<meta name="theme-color" content="#050705" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Schlagherz" />
+<link rel="manifest" href="manifest.webmanifest?v=3" />
+<link rel="icon" href="icon-192.svg?v=3" type="image/svg+xml" />
+<style>
+    :root{--bg:#040504;--line2:#35543a;--text:#f5faf5;--muted:#c8d3c8;--green:#8bff9e;--shadow:rgba(0,0,0,.52)}
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{margin:0;height:100%;background:radial-gradient(circle at top,#121812 0%,#070907 45%,#040504 100%);color:var(--text);font-family:Inter,Arial,sans-serif;overflow:hidden}
-    body{overscroll-behavior:none}
-    button,input,select{font:inherit}
-    .app{
-      height:100dvh;
-      width:100vw;
-      padding:10px;
-      display:grid;
-      grid-template-rows:auto minmax(0, 1.02fr) minmax(0, 0.98fr);
-      gap:10px;
-      overflow:hidden;
-    }
-    .nameplate{
-      display:flex;align-items:center;justify-content:center;flex-direction:column;
-      min-height:58px;
-      border:1px solid var(--line2);
-      border-radius:14px;
-      background:
-        linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0)),
-        linear-gradient(180deg,#0d130e,#070907 70%);
-      box-shadow:0 8px 20px var(--shadow), inset 0 1px 0 rgba(255,255,255,.03), inset 0 -16px 26px rgba(0,0,0,.22);
-      position:relative;
-      overflow:hidden;
-    }
-    .nameplate::before,
-    .nameplate::after{
-      content:"";position:absolute;top:12px;width:10px;height:10px;border-radius:50%;
-      background:radial-gradient(circle at 30% 30%,#d5dcd5 0%,#687268 32%,#222 65%,#090909 100%);
-      box-shadow:0 0 0 1px #1d241d, inset 0 0 2px rgba(255,255,255,.15);
-    }
+    html,body{margin:0;width:100%;height:100%;background:radial-gradient(circle at 50% -20%, rgba(90,255,140,.08), transparent 35%),linear-gradient(180deg,#0a0d0a 0%, #040504 100%);color:var(--text);font-family:Inter,Arial,sans-serif;overflow:hidden;touch-action:manipulation}
+    body{overscroll-behavior:none} button,input,select{font:inherit}
+    .app{width:100vw;height:100dvh;padding:calc(env(safe-area-inset-top,0px) + 10px) calc(env(safe-area-inset-right,0px) + 10px) calc(env(safe-area-inset-bottom,0px) + 10px) calc(env(safe-area-inset-left,0px) + 10px);display:grid;grid-template-rows:minmax(70px,78px) minmax(338px,45.5dvh) minmax(286px,31.5dvh) minmax(138px,16.5dvh);gap:10px;overflow:hidden;background:linear-gradient(180deg, rgba(255,255,255,.015), rgba(255,255,255,0)),radial-gradient(circle at top, rgba(64,255,122,.04), transparent 40%)}
+    .nameplate,.panel,.footer-strip{border:1px solid var(--line2);border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,0)),linear-gradient(180deg,#0d130d 0%,#060806 100%);box-shadow:0 10px 26px var(--shadow),inset 0 1px 0 rgba(255,255,255,.04),inset 0 0 0 1px rgba(123,255,154,.03),inset 0 -18px 24px rgba(0,0,0,.24);overflow:hidden;min-width:0;min-height:0}
+    .nameplate{position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;padding:8px 18px;text-align:center}
+    .nameplate::before,.nameplate::after{content:"";position:absolute;top:12px;width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #eef4ee 0%, #748374 28%, #232923 62%, #050505 100%);box-shadow:0 0 0 1px #1f261f, inset 0 0 4px rgba(255,255,255,.15)}
     .nameplate::before{left:14px}.nameplate::after{right:14px}
-    .name{letter-spacing:.18em;font-size:clamp(21px,3.6vw,34px);font-weight:800;color:#fbfffb;text-shadow:0 0 8px rgba(255,255,255,.06)}
-    .subtitle{font-size:clamp(10px,1.5vw,15px);letter-spacing:.24em;color:#f4fff4;text-transform:uppercase;opacity:.98}
-
-    .panel{
-      min-width:0;min-height:0;
-      border:1px solid var(--line2);
-      border-radius:16px;
-      background:
-        linear-gradient(180deg,rgba(255,255,255,.018),rgba(255,255,255,0)),
-        linear-gradient(180deg,#0f1410 0%, #090c09 100%);
-      box-shadow:0 10px 24px var(--shadow), inset 0 1px 0 rgba(255,255,255,.03), inset 0 -14px 20px rgba(0,0,0,.2);
-      overflow:hidden;
-    }
-    .matrix-panel{
-      display:grid;
-      grid-template-rows:auto auto minmax(0,1fr);
-      padding:10px;
-      gap:8px;
-    }
-    .panel-header{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:28px;
-    }
-    .badge{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 12px;
-      border-radius:999px;
-      border:1px solid var(--line2);
-      background:linear-gradient(180deg,#0d120d,#080908);
-      color:#fff;text-transform:uppercase;font-size:11px;font-weight:800;letter-spacing:.18em;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.03), 0 2px 10px rgba(0,0,0,.25);
-    }
-    .row-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-    .mini-btn,.btn,.toggle,.slot-btn{
-      border:1px solid var(--line2);color:var(--text);background:
-      linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,0)),
-      linear-gradient(180deg,#111711,#090b09);
-      border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.03);
-      cursor:pointer;
-    }
-    .mini-btn{padding:7px 10px;min-height:34px;font-size:12px;font-weight:700;letter-spacing:.08em}
-    .mini-btn.active,.toggle.active,.slot-btn.active,.btn.active{
-      border-color:#5ee17a;box-shadow:0 0 0 1px rgba(124,255,154,.32), 0 0 14px rgba(57,207,97,.16), inset 0 1px 0 rgba(255,255,255,.04);
-      color:#fff;
-    }
-    .display{
-      min-height:34px;padding:7px 10px;border-radius:10px;border:1px solid #283728;
-      background:#030503;color:var(--green);font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size:13px;letter-spacing:.12em;display:flex;align-items:center;justify-content:center;
-      box-shadow:inset 0 0 12px rgba(53,207,97,.12), inset 0 0 2px rgba(124,255,154,.2), 0 1px 6px rgba(0,0,0,.28);
-      text-shadow:0 0 8px rgba(124,255,154,.22);
-      white-space:nowrap;
-    }
-    .matrix-wrap{
-      min-height:0;
-      display:grid;
-      grid-template-rows:auto minmax(0,1fr);
-      gap:6px;
-      overflow:hidden;
-    }
-    .step-header,.track-row{
-      display:grid;
-      grid-template-columns:76px repeat(16,minmax(0,1fr));
-      gap:4px;
-      align-items:center;
-    }
-    .step-header{min-height:26px}
-    .step-label,.track-label,.step-btn{min-width:0}
-    .step-label{
-      color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.18em;text-align:center;
-    }
-    .step-head{
-      min-height:24px;display:flex;align-items:center;justify-content:center;
-      font-size:10px;font-weight:800;letter-spacing:.08em;color:#ebf4eb;
-      border:1px solid transparent;border-radius:7px;
-    }
-    .block-end{position:relative;margin-right:8px}
-    .block-end::after{
-      content:"";position:absolute;top:-6px;right:-5px;bottom:-6px;width:1px;background:linear-gradient(180deg,transparent,#3f6547 18%,#81ffa3 50%,#3f6547 82%,transparent);opacity:.85;
-    }
-    .tracks{
-      min-height:0;
-      display:grid;
-      grid-template-rows:repeat(9,minmax(0,1fr));
-      gap:4px;
-    }
-    .track-row{min-height:0}
-    .track-label{
-      height:100%;min-height:28px;padding:0 7px;border-radius:9px;border:1px solid var(--line2);
-      background:linear-gradient(180deg,#111711,#090b09);display:flex;align-items:center;justify-content:flex-start;
-      font-size:11px;font-weight:800;letter-spacing:.06em;color:#f5faf5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-      box-shadow:0 2px 6px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.03);
-      cursor:pointer;
-    }
-    .track-label.selected{border-color:#65f58a;box-shadow:0 0 0 1px rgba(124,255,154,.32), 0 0 14px rgba(57,207,97,.16), inset 0 1px 0 rgba(255,255,255,.04)}
-    .step-btn{
-      height:100%;min-height:28px;border-radius:8px;border:1px solid #2a362a;
-      background:linear-gradient(180deg,#111611,#070907);box-shadow:inset 0 1px 0 rgba(255,255,255,.025), inset 0 -4px 8px rgba(0,0,0,.18);
-      display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;cursor:pointer;
-      user-select:none;touch-action:manipulation;
-    }
-    .step-btn.on{
-      background:radial-gradient(circle at 50% 35%, #d9ffe2 0%, #7cff9a 34%, #35cf61 62%, #102516 100%);
-      color:#021503;text-shadow:none;
-      box-shadow:0 0 0 1px rgba(124,255,154,.38), 0 0 14px rgba(53,207,97,.32), inset 0 1px 0 rgba(255,255,255,.22);
-    }
-    .step-btn.playing{outline:2px solid rgba(244,255,244,.85);outline-offset:-2px}
-
-    .bottom{
-      min-height:0;
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      overflow:hidden;
-    }
-    .control-panel{padding:10px;display:grid;grid-template-rows:auto minmax(0,1fr);gap:8px;overflow:hidden}
-    .control-body{min-height:0;display:grid;gap:8px;overflow:hidden}
-    .global-grid{
-      grid-template-columns:48px 128px 110px 1fr;
-      display:grid;gap:8px;align-items:start;min-height:0;
-    }
-    .track-grid{
-      grid-template-columns:52px 1fr 1fr;
-      display:grid;gap:8px;align-items:start;min-height:0;
-    }
-    .group{
-      min-height:0;
-      border:1px solid #223022;border-radius:14px;padding:8px;
-      background:linear-gradient(180deg,rgba(255,255,255,.018),rgba(255,255,255,0)), linear-gradient(180deg,#0d120d,#080908);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.02), inset 0 -10px 16px rgba(0,0,0,.16);
-      overflow:hidden;
-    }
-    .vertical-fader{display:grid;justify-items:center;align-items:start;gap:6px}
-    .label{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#f2f7f2}
-    input[type="range"]{appearance:none;background:transparent;margin:0}
-    .v-range{writing-mode:bt-lr;-webkit-appearance:slider-vertical;width:24px;height:122px}
-    .h-row{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:8px;align-items:center;margin-bottom:7px}
-    .h-row:last-child{margin-bottom:0}
-    input[type=range]::-webkit-slider-runnable-track{
-      background:linear-gradient(180deg,#172017,#0a0d0a);border:1px solid #314031;border-radius:999px;box-shadow:inset 0 1px 3px rgba(0,0,0,.38);
-      height:8px;
-    }
-    input[type=range]::-webkit-slider-thumb{
-      -webkit-appearance:none;appearance:none;width:18px;height:18px;margin-top:-6px;border-radius:50%;border:1px solid #d9f6df;background:radial-gradient(circle at 35% 35%, #fcfffc 0%, #9fffbb 22%, #41db6d 52%, #163321 100%);box-shadow:0 0 8px rgba(124,255,154,.22), 0 2px 6px rgba(0,0,0,.28)
-    }
-    .v-range::-webkit-slider-runnable-track{width:8px;height:100%}
-    .v-range::-webkit-slider-thumb{margin-top:0;margin-left:-6px}
-    select, input[type="number"]{
-      height:34px;border-radius:10px;border:1px solid #2a382a;background:#040604;color:var(--green);padding:0 10px;
-      box-shadow:inset 0 0 10px rgba(53,207,97,.1), 0 1px 6px rgba(0,0,0,.24);
-      font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:13px
-    }
-    .btn{min-height:36px;padding:7px 10px;font-size:12px;font-weight:800;letter-spacing:.08em;display:flex;align-items:center;justify-content:center;text-transform:uppercase}
-    .btn.big{min-height:50px;font-size:14px;border-radius:14px}
-    .toggle{min-height:34px;padding:7px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:800;letter-spacing:.08em}
-    .lamp{width:12px;height:12px;border-radius:50%;background:#1a241a;border:1px solid #334333;box-shadow:inset 0 0 4px rgba(0,0,0,.42)}
-    .toggle.active .lamp{background:radial-gradient(circle at 35% 35%, #ecfff0 0%, #7cff9a 32%, #35cf61 60%, #12361d 100%);box-shadow:0 0 10px rgba(53,207,97,.34)}
-    .adsr{
-      display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-items:start;justify-items:center
-    }
-    .adsr .vertical-fader{gap:4px}
-    .track-right{display:grid;grid-template-rows:auto auto auto 1fr;gap:8px;min-height:0}
-    .track-buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-    .sample-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-    .slot-btn{min-height:36px;padding:8px 10px;font-size:12px;font-weight:800;letter-spacing:.08em}
-    .tiny{font-size:11px;color:var(--muted)}
-
-    @media (orientation: portrait){
-      .app{grid-template-rows:auto minmax(0,1.18fr) minmax(0,1fr)}
-      .step-header,.track-row{grid-template-columns:64px repeat(16,minmax(0,1fr));gap:3px}
-      .global-grid{grid-template-columns:42px 110px 100px 1fr;gap:6px}
-      .track-grid{grid-template-columns:42px 1fr 1fr;gap:6px}
-      .h-row{grid-template-columns:46px minmax(0,1fr) auto;gap:6px}
-      .btn.big{min-height:46px}
-      .v-range{height:112px}
-      .mini-btn,.btn,.toggle,.slot-btn,.display,select,input[type="number"]{font-size:11px}
-    }
-  </style>
+    .name{letter-spacing:.2em;font-size:clamp(28px,4.1vw,42px);font-weight:900;color:#f8fff8;text-shadow:0 0 10px rgba(255,255,255,.08)}
+    .subtitle{letter-spacing:.28em;font-size:clamp(11px,1.45vw,16px);text-transform:uppercase;color:#f1fff2;opacity:.96}
+    .panel{padding:11px}.panel-header,.matrix-head{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:38px}
+    .badge{display:inline-flex;align-items:center;justify-content:center;padding:9px 16px;border-radius:999px;border:1px solid var(--line2);background:linear-gradient(180deg,#111711,#090b09);color:#f8fff8;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.22em;box-shadow:0 0 0 1px rgba(255,255,255,.015), inset 0 1px 0 rgba(255,255,255,.04);white-space:nowrap}
+    .row-controls{display:flex;align-items:center;gap:8px;min-width:0}
+    .mini-btn,.btn,.toggle,.slot-btn,.display,.rec-tall{border:1px solid var(--line2);border-radius:12px;color:var(--text);background:linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,0)),linear-gradient(180deg,#121912,#090b09);box-shadow:0 4px 12px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.035)}
+    .mini-btn,.btn,.toggle,.slot-btn,.rec-tall{cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+    .mini-btn,.btn,.toggle,.slot-btn{min-height:44px;padding:8px 12px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+    .mini-btn.active,.btn.active,.toggle.active,.slot-btn.active,.rec-tall.active{border-color:#6af489;box-shadow:0 0 0 1px rgba(124,255,154,.34),0 0 14px rgba(73,216,110,.18),inset 0 1px 0 rgba(255,255,255,.06)}
+    .btn.big{min-height:58px;font-size:15px;letter-spacing:.12em}
+    .display{min-height:44px;padding:9px 12px;display:flex;align-items:center;justify-content:center;background:#030503;color:var(--green);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px;letter-spacing:.12em;text-shadow:0 0 10px rgba(124,255,154,.2);box-shadow:inset 0 0 12px rgba(73,216,110,.12), inset 0 0 2px rgba(124,255,154,.18), 0 1px 8px rgba(0,0,0,.3);white-space:nowrap}
+    .transport-display{min-width:86px}.track-display{min-width:130px}
+    .matrix-panel{display:grid;grid-template-rows:auto minmax(0,1fr);gap:9px}.matrix-wrap{min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr);gap:6px;overflow:hidden}
+    .step-header,.track-row{display:grid;grid-template-columns:84px repeat(16,minmax(0,1fr));gap:4px;align-items:center}.step-label{color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;text-align:center}
+    .step-head{min-height:24px;display:flex;align-items:center;justify-content:center;color:#eef7ee;font-size:11px;font-weight:800;letter-spacing:.08em;border-radius:7px}.block-end{position:relative;margin-right:10px}.block-end::after{content:"";position:absolute;top:-8px;right:-6px;bottom:-8px;width:1px;background:linear-gradient(180deg, transparent, rgba(124,255,154,.75) 18%, rgba(124,255,154,.22) 50%, rgba(124,255,154,.75) 82%, transparent);opacity:.95;pointer-events:none}
+    .tracks{min-height:0;display:grid;grid-template-rows:repeat(9,minmax(0,1fr));gap:4px}.track-label{width:100%;min-height:36px;padding:0 8px;border-radius:12px;border:1px solid var(--line2);background:linear-gradient(180deg,#111711,#090b09);box-shadow:0 3px 8px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.03);display:flex;align-items:center;justify-content:flex-start;color:#f6fbf6;font-size:11px;font-weight:800;letter-spacing:.08em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}.track-label.selected{border-color:#6af489;box-shadow:0 0 0 1px rgba(124,255,154,.32), 0 0 14px rgba(73,216,110,.16), inset 0 1px 0 rgba(255,255,255,.05)}
+    .step-btn{min-height:36px;border-radius:11px;border:1px solid #243224;background:linear-gradient(180deg,#101610,#050705);box-shadow:inset 0 1px 0 rgba(255,255,255,.025), inset 0 -6px 10px rgba(0,0,0,.22);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;touch-action:manipulation}.step-btn.on{color:#02230b;background:radial-gradient(circle at 50% 35%, #effff2 0%, #9dffb1 28%, #4fe06f 56%, #11361b 100%);box-shadow:0 0 0 1px rgba(124,255,154,.4), 0 0 16px rgba(73,216,110,.28), inset 0 1px 0 rgba(255,255,255,.24)}.step-btn.playing{outline:2px solid rgba(250,255,250,.92);outline-offset:-2px}
+    .controls{min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:10px}.global-panel,.track-panel{min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr);gap:8px}.global-body{min-height:0;display:grid;grid-template-columns:106px minmax(0,1fr) 118px;gap:8px}.stack-col,.action-col,.field-col{min-height:0;display:grid;gap:8px;align-content:start}
+    .stack-card,.fader-bank,.track-card,.sample-zone,.footer-strip{border:1px solid #213021;border-radius:15px;background:linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),linear-gradient(180deg,#0c110c,#080a08);box-shadow:inset 0 1px 0 rgba(255,255,255,.025), inset 0 -10px 16px rgba(0,0,0,.16);min-width:0;min-height:0}.stack-card{padding:9px;display:grid;gap:8px}
+    .field-row{display:grid;gap:7px;align-content:start}.fader-label,.small-label{font-size:10px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:#f4faf4;text-align:center;line-height:1.2}.small-label.left{text-align:left}
+    select,input[type="number"]{width:100%;min-height:44px;padding:0 10px;border-radius:12px;border:1px solid #314331;background:#040604;color:#f7fff7;outline:none;box-shadow:inset 0 0 10px rgba(0,0,0,.26);font-size:15px;font-weight:700}
+    input[type="range"]{appearance:none;-webkit-appearance:none;background:transparent;margin:0} input[type=range]::-webkit-slider-runnable-track{height:9px;border-radius:999px;border:1px solid #314331;background:linear-gradient(180deg,#162016,#090c09);box-shadow:inset 0 1px 3px rgba(0,0,0,.4)} input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;margin-top:-10px;border-radius:50%;border:1px solid rgba(228,255,232,.55);background:radial-gradient(circle at 35% 35%, #f3fff4 0%, #94ffae 34%, #4fdf70 64%, #1e6a34 100%);box-shadow:0 0 0 1px rgba(124,255,154,.26), 0 0 16px rgba(73,216,110,.28)}
+    .v-range{width:32px;height:208px;-webkit-appearance:slider-vertical;writing-mode:bt-lr}.v-range::-webkit-slider-runnable-track{width:10px;height:100%}.v-range::-webkit-slider-thumb{margin-top:0;margin-left:-9px}
+    .fader-bank{padding:10px 8px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;justify-items:center;align-content:start}.fader-bank.track-bank{grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;padding:10px 6px 8px}.fader{display:grid;justify-items:center;align-content:start;gap:8px;min-width:0}.action-col .btn,.action-col .toggle,.stack-col .btn,.stack-col .toggle{width:100%}
+    .track-body{min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:8px}.track-card{padding:10px}.pan-card{display:grid;gap:8px}.pan-top{display:grid;grid-template-columns:26px minmax(0,1fr) 54px 26px;gap:8px;align-items:center;color:#f0faf0;font-weight:800;letter-spacing:.12em}.pan-top .small-label{font-size:12px}.pan-title{font-size:13px;font-weight:900;letter-spacing:.2em;text-align:center;text-transform:uppercase}
+    .track-footer{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:8px;align-items:stretch}.start-card{display:grid;gap:8px}.start-inline{display:grid;grid-template-columns:minmax(0,1fr) 64px;gap:8px;align-items:center}
+    #trackTempoNum,#panDisp{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+    .footer-strip{padding:10px;display:grid;grid-template-columns:minmax(0,1.9fr) 112px minmax(0,1.18fr);gap:10px;align-items:stretch}.sample-zone{padding:8px;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:8px}.sample-grid{min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.slot-btn{font-size:14px;letter-spacing:.08em}.tiny{font-size:11px;color:var(--muted);letter-spacing:.04em;min-height:14px;text-align:left;padding:0 2px}.rec-tall{min-height:100%;padding:10px 12px;font-size:16px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;line-height:1.35}.perf-grid{min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-content:stretch}.perf-grid .btn{min-height:58px;font-size:14px}
+    @media (max-height:1050px){.app{grid-template-rows:minmax(68px,76px) minmax(310px,44.5dvh) minmax(270px,31dvh) minmax(126px,16dvh)} .v-range{height:184px} .step-header,.track-row{grid-template-columns:76px repeat(16,minmax(0,1fr))} .track-label,.step-btn{min-height:33px}}
+    @media (orientation:landscape){.app::after{content:"SCHLAGHERZ ist für diese iPad-Fassung im Hochformat gedacht.";position:fixed;inset:0;background:rgba(2,4,2,.82);display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:#f5fff5;font-size:24px;letter-spacing:.08em;z-index:99}}
+</style>
 </head>
 <body>
   <div class="app">
-    <div class="nameplate">
-      <div class="name">SCHLAGHERZ</div>
-      <div class="subtitle">POETISCHE RHYTHMUSMASCHINE</div>
-    </div>
-
+    <header class="nameplate"><div class="name">SCHLAGHERZ</div><div class="subtitle">POETISCHE RHYTHMUSMASCHINE</div></header>
     <section class="panel matrix-panel">
-      <div class="panel-header">
-        <div class="badge">Step Matrix</div>
-        <div class="row-controls">
-          <button class="mini-btn active" id="len16Btn">16 Steps</button>
-          <button class="mini-btn" id="len32Btn">32 Steps</button>
-          <button class="mini-btn" id="pageBtn" style="display:none">Page 1 / 2</button>
-          <div class="display" id="transportDisplay">STOP</div>
-        </div>
-      </div>
-      <div class="matrix-wrap">
-        <div class="step-header" id="stepHeader"></div>
-        <div class="tracks" id="tracks"></div>
-      </div>
+      <div class="matrix-head"><div class="badge">Step Matrix</div><div class="row-controls"><button class="mini-btn active" id="len16Btn">16 Steps</button><button class="mini-btn" id="len32Btn">32 Steps</button><button class="mini-btn" id="pageBtn" style="display:none">Page 1 / 2</button><div class="display transport-display" id="transportDisplay">STOP</div></div></div>
+      <div class="matrix-wrap"><div class="step-header" id="stepHeader"></div><div class="tracks" id="tracks"></div></div>
     </section>
-
-    <div class="bottom">
-      <section class="panel control-panel">
+    <section class="controls">
+      <section class="panel global-panel">
         <div class="panel-header"><div class="badge">Global</div></div>
-        <div class="control-body">
-          <div class="global-grid">
-            <div class="group vertical-fader">
-              <div class="label">Vol</div>
-              <input id="masterVol" class="v-range" type="range" min="0" max="1" step="0.01" value="0.8" />
-            </div>
-
-            <div class="group">
-              <div class="h-row"><div class="label">BPM</div><input id="bpmInput" type="number" min="5" max="500" value="120" /></div>
-              <div class="h-row"><div class="label">Beat</div><select id="beatSelect"><option>4/4</option><option>8/4</option><option>3/4</option><option>6/4</option></select></div>
-              <button class="toggle" id="metBtn"><span>MET</span><span class="lamp"></span></button>
-              <div style="height:8px"></div>
-              <button class="btn big" id="startStopBtn">Start / Stop</button>
-            </div>
-
-            <div class="group" style="display:grid;gap:7px">
-              <button class="btn" id="clearAllBtn">Clear All</button>
-              <button class="btn" id="globalResetBtn">Global Reset</button>
-              <button class="btn" id="fillBtn">Fill</button>
-              <button class="btn" id="variationBtn">Variation</button>
-              <button class="btn" id="saveBtn">Save</button>
-              <button class="btn" id="loadBtn">Load</button>
-              <button class="btn big" id="undoBtn">Undo</button>
-            </div>
-
-            <div class="group" style="display:grid;gap:7px;align-content:start">
-              <div class="h-row"><div class="label">RVB</div><input id="reverbAmt" type="range" min="0" max="1" step="0.01" value="0" /></div>
-              <div class="h-row"><div class="label">DLY</div><input id="delayTime" type="range" min="0" max="1" step="0.01" value="0" /></div>
-              <div class="h-row"><div class="label">DFB</div><input id="delayFb" type="range" min="0" max="0.92" step="0.01" value="0" /></div>
-              <button class="toggle" id="syncBtn"><span>SYNC</span><span class="lamp"></span></button>
-              <button class="toggle" id="midiBtn"><span>MIDI</span><span class="lamp"></span></button>
-              <button class="btn" id="wavBtn">Loop → WAV</button>
-            </div>
+        <div class="global-body">
+          <div class="stack-col">
+            <div class="stack-card field-col"><div class="field-row"><div class="small-label left">BPM</div><input id="bpmInput" type="number" min="5" max="500" value="120" /></div><div class="field-row"><div class="small-label left">Beat</div><select id="beatSelect"><option>4/4</option><option>8/4</option><option>3/4</option><option>6/4</option></select></div><button class="toggle" id="metBtn"><span>MET</span></button></div>
+            <button class="btn big" id="startStopBtn">Start / Stop</button><button class="btn" id="undoBtn">Undo</button><button class="btn" id="clearAllBtn">Clear All</button><button class="btn" id="globalResetBtn">Global Reset</button><button class="btn" id="saveBtn">Save</button><button class="btn" id="loadBtn">Load</button>
           </div>
+          <div class="fader-bank"><div class="fader"><div class="fader-label">VOL</div><input id="masterVol" class="v-range" type="range" min="0" max="1" step="0.01" value="0.8" /></div><div class="fader"><div class="fader-label">RVB</div><input id="reverbAmt" class="v-range" type="range" min="0" max="1" step="0.01" value="0" /></div><div class="fader"><div class="fader-label">DLY</div><input id="delayTime" class="v-range" type="range" min="0" max="1" step="0.01" value="0" /></div><div class="fader"><div class="fader-label">FDB</div><input id="delayFb" class="v-range" type="range" min="0" max="0.92" step="0.01" value="0" /></div></div>
+          <div class="action-col"><button class="btn" id="fillBtn">Fill</button><button class="btn" id="variationBtn">Variation</button><button class="btn" id="wavBtn">Loop → WAV</button><button class="toggle" id="syncBtn"><span>Sync</span></button><button class="toggle" id="midiBtn"><span>MIDI</span></button></div>
         </div>
       </section>
-
-      <section class="panel control-panel">
-        <div class="panel-header"><div class="badge">Per Track</div><div class="display" id="trackDisplay">TRK I: SMP</div></div>
-        <div class="control-body">
-          <div class="track-grid">
-            <div class="group vertical-fader">
-              <div class="label">Vol</div>
-              <input id="trackVol" class="v-range" type="range" min="0" max="1" step="0.01" value="0.8" />
-            </div>
-
-            <div class="group" style="display:grid;gap:8px">
-              <div class="h-row"><div class="label">Pan</div><input id="trackPan" type="range" min="-1" max="1" step="0.01" value="0" /><div class="display" id="panDisp">C</div></div>
-              <div class="adsr">
-                <div class="vertical-fader"><div class="label">A</div><input id="trackA" class="v-range" type="range" min="0" max="0.2" step="0.001" value="0.001" /></div>
-                <div class="vertical-fader"><div class="label">D</div><input id="trackD" class="v-range" type="range" min="0.02" max="1.2" step="0.001" value="0.18" /></div>
-                <div class="vertical-fader"><div class="label">R</div><input id="trackR" class="v-range" type="range" min="0.02" max="1.2" step="0.001" value="0.09" /></div>
-                <div class="vertical-fader"><div class="label">Tune</div><input id="trackTune" class="v-range" type="range" min="-12" max="12" step="1" value="0" /></div>
-              </div>
-            </div>
-
-            <div class="group track-right">
-              <div>
-                <div class="h-row"><div class="label">RVB Int</div><input id="trackRvbInt" type="range" min="0" max="1" step="0.01" value="0" /></div>
-                <div class="h-row"><div class="label">DLY Int</div><input id="trackDlyInt" type="range" min="0" max="1" step="0.01" value="0" /></div>
-                <div class="h-row"><div class="label">Tempo</div><input id="trackTempo" type="range" min="0.25" max="4" step="0.01" value="1" /><input id="trackTempoNum" type="number" min="0.25" max="4" step="0.01" value="1" /></div>
-                <div class="h-row"><div class="label">Start</div><input id="trackStart" type="range" min="0" max="31" step="1" value="0" /><div class="display" id="trackStartDisp">01</div></div>
-              </div>
-              <div class="track-buttons">
-                <button class="btn" id="muteBtn">Mute</button>
-                <button class="btn" id="soloBtn">Solo</button>
-                <button class="btn" id="quantBtn">Quant</button>
-                <button class="btn" id="triggerBtn">Trigger</button>
-              </div>
-              <div class="track-buttons">
-                <button class="btn" id="liveRecBtn">Live Rec</button>
-                <button class="btn" id="startTrkBtn">Start Trk</button>
-                <button class="btn" id="recSlotBtn">Rec Slot</button>
-                <button class="btn" id="playSlotBtn">Play Slot</button>
-              </div>
-              <div>
-                <div class="sample-grid" id="sampleSlots"></div>
-                <div class="tiny" id="samplerInfo">Sampler bereit.</div>
-              </div>
-            </div>
-          </div>
+      <section class="panel track-panel">
+        <div class="panel-header"><div class="badge">Per Track</div><div class="display track-display" id="trackDisplay">TRK I: SMP</div></div>
+        <div class="track-body">
+          <div class="track-card pan-card"><div class="pan-top"><div class="small-label">L</div><div class="pan-title">PAN</div><div class="small-label">CTR</div><div class="small-label">R</div></div><input id="trackPan" type="range" min="-1" max="1" step="0.01" value="0" /><div id="panDisp">C</div></div>
+          <div class="fader-bank track-bank"><div class="fader"><div class="fader-label">VOL</div><input id="trackVol" class="v-range" type="range" min="0" max="1" step="0.01" value="0.8" /></div><div class="fader"><div class="fader-label">TUNE</div><input id="trackTune" class="v-range" type="range" min="-12" max="12" step="1" value="0" /></div><div class="fader"><div class="fader-label">A</div><input id="trackA" class="v-range" type="range" min="0" max="0.2" step="0.001" value="0.001" /></div><div class="fader"><div class="fader-label">D</div><input id="trackD" class="v-range" type="range" min="0.02" max="1.2" step="0.001" value="0.18" /></div><div class="fader"><div class="fader-label">R</div><input id="trackR" class="v-range" type="range" min="0.02" max="1.2" step="0.001" value="0.09" /></div><div class="fader"><div class="fader-label">RVB<br>INT</div><input id="trackRvbInt" class="v-range" type="range" min="0" max="1" step="0.01" value="0" /></div><div class="fader"><div class="fader-label">DLY<br>INT</div><input id="trackDlyInt" class="v-range" type="range" min="0" max="1" step="0.01" value="0" /></div><div class="fader"><div class="fader-label">TMP</div><input id="trackTempo" class="v-range" type="range" min="0.25" max="4" step="0.01" value="1" /><input id="trackTempoNum" type="number" min="0.25" max="4" step="0.01" value="1" /></div></div>
+          <div class="track-footer"><div class="track-card start-card"><div class="small-label left">Track Start Offset</div><div class="start-inline"><input id="trackStart" type="range" min="0" max="31" step="1" value="0" /><div class="display" id="trackStartDisp">01</div></div></div><button class="btn big" id="startTrkBtn">Start Trk</button></div>
         </div>
       </section>
-    </div>
+    </section>
+    <section class="footer-strip panel"><div class="sample-zone"><div class="sample-grid" id="sampleSlots"></div><div class="tiny" id="samplerInfo">Sampler bereit.</div></div><button class="rec-tall" id="recSlotBtn">Rec<br>Smpl<br>Slot</button><div class="perf-grid"><button class="btn" id="soloBtn">Solo</button><button class="btn" id="quantBtn">Quant</button><button class="btn" id="liveRecBtn">Live Rec</button><button class="btn" id="muteBtn">Mute</button><button class="btn" id="triggerBtn">Trigger</button><button class="btn" id="playSlotBtn">Play Slot</button></div></section>
   </div>
-
 <script>
 (() => {
   const TRACKS = [
@@ -363,7 +96,7 @@
     { code:'A', name:'BD', type:'bd' }
   ];
   const TOTAL_STEPS = 32;
-  const STORAGE_KEY = 'schlagherz-pwa-v2-state';
+  const STORAGE_KEY = 'schlagherz-pwa-v3-state';
   const WAV_SAMPLE_RATE = 44100;
 
   const state = {
@@ -405,6 +138,7 @@
   };
 
   let audioCtx, masterGain, dryGain, globalVerbSend, globalDelaySend, convolver, delayNode, delayFeedback, compressor;
+  const noiseCache = new Map();
   let trackRowEls = [];
   let stepEls = [];
   let hasLoadedFromStorage = false;
@@ -512,129 +246,227 @@
     delayNode.delayTime.setTargetAtTime(dly, audioCtx.currentTime, 0.02);
   }
 
-  function connectVoice(node, track){
-    const panner = audioCtx.createStereoPanner();
-    const gain = audioCtx.createGain();
-    panner.pan.value = track.pan;
-    gain.gain.value = track.vol;
-    node.connect(gain);
-    gain.connect(panner);
-    panner.connect(dryGain);
 
-    if(track.rvbInt > 0 && state.reverbAmt > 0){
-      const s = audioCtx.createGain();
-      s.gain.value = track.rvbInt * state.reverbAmt * 0.65;
-      panner.connect(s);
-      s.connect(globalVerbSend);
-    }
-    if(track.dlyInt > 0 && state.delayTime > 0){
-      const s2 = audioCtx.createGain();
-      s2.gain.value = track.dlyInt * state.delayTime * 0.55;
-      panner.connect(s2);
-      s2.connect(globalDelaySend);
-    }
-    return gain;
+function createTrackOutput(track){
+  const panner = audioCtx.createStereoPanner();
+  const gain = audioCtx.createGain();
+  panner.pan.value = track.pan;
+  gain.gain.value = track.vol;
+  gain.connect(panner);
+  panner.connect(dryGain);
+
+  if(track.rvbInt > 0 && state.reverbAmt > 0){
+    const s = audioCtx.createGain();
+    s.gain.value = track.rvbInt * state.reverbAmt * 0.65;
+    panner.connect(s);
+    s.connect(globalVerbSend);
   }
-
-  function shapeEnv(gainNode, time, a, d, r, peak=1, sustain=0.0001){
-    gainNode.gain.cancelScheduledValues(time);
-    gainNode.gain.setValueAtTime(0.0001, time);
-    gainNode.gain.linearRampToValueAtTime(Math.max(0.001, peak), time + Math.max(0.001, a));
-    gainNode.gain.exponentialRampToValueAtTime(Math.max(0.0002, sustain), time + Math.max(0.01, a + d));
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, time + Math.max(0.03, a + d + r));
+  if(track.dlyInt > 0 && state.delayTime > 0){
+    const s2 = audioCtx.createGain();
+    s2.gain.value = track.dlyInt * Math.max(0.15, state.delayTime) * 0.48;
+    panner.connect(s2);
+    s2.connect(globalDelaySend);
   }
+  return gain;
+}
 
-  function noiseBurst(track, time, duration, filterType, freq, gainAmount){
-    const size = Math.max(64, Math.floor(audioCtx.sampleRate * duration));
-    const buffer = audioCtx.createBuffer(1, size, audioCtx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for(let i=0;i<size;i++) data[i] = Math.random() * 2 - 1;
-    const src = audioCtx.createBufferSource();
-    src.buffer = buffer;
-    const filt = audioCtx.createBiquadFilter();
-    filt.type = filterType;
-    filt.frequency.value = freq;
-    const post = audioCtx.createGain();
-    const amp = connectVoice(filt, track);
-    src.connect(filt);
-    filt.connect(post);
-    post.connect(amp);
-    shapeEnv(post, time, track.a, Math.max(0.01, duration * 0.45 + track.d * 0.12), Math.max(0.02, duration * 0.5 + track.r * 0.15), gainAmount);
-    src.start(time);
-    src.stop(time + duration + 0.03);
-  }
+function pitchRatio(semitones){
+  return Math.pow(2, (semitones || 0) / 12);
+}
 
-  function toneBurst(track, time, freq, duration, type='sine', gainAmount=1, glideTo=null){
+function noiseBuffer(duration=0.16){
+  const key = Math.round(duration * 1000);
+  if(noiseCache.has(key)) return noiseCache.get(key);
+  const size = Math.max(64, Math.floor(audioCtx.sampleRate * duration));
+  const buffer = audioCtx.createBuffer(1, size, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for(let i=0;i<size;i++) data[i] = Math.random() * 2 - 1;
+  noiseCache.set(key, buffer);
+  return buffer;
+}
+
+function envAt(gainNode, time, peak, attack, decay, release, sustain=0.0001){
+  gainNode.gain.cancelScheduledValues(time);
+  gainNode.gain.setValueAtTime(0.0001, time);
+  gainNode.gain.linearRampToValueAtTime(Math.max(0.001, peak), time + Math.max(0.0005, attack));
+  gainNode.gain.exponentialRampToValueAtTime(Math.max(0.0002, sustain), time + Math.max(0.004, attack + decay + release));
+}
+
+function synthDrum(type, time, out, track){
+  const atk = Math.max(0.0005, track.a || 0.001);
+  const dec = Math.max(0.005, track.d || 0.12);
+  const rel = Math.max(0.005, track.r || 0.05);
+  const ratio = pitchRatio(track.tune);
+
+  if(type === 'bd'){
     const osc = audioCtx.createOscillator();
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, time);
-    if(glideTo) osc.frequency.exponentialRampToValueAtTime(glideTo, time + Math.min(duration, 0.08 + track.d * 0.08));
-    const post = audioCtx.createGain();
-    const amp = connectVoice(osc, track);
-    osc.connect(post);
-    post.connect(amp);
-    shapeEnv(post, time, track.a, Math.max(0.01, duration * 0.45 + track.d * 0.12), Math.max(0.02, duration * 0.45 + track.r * 0.16), gainAmount);
+    const g = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(150 * ratio, time);
+    osc.frequency.exponentialRampToValueAtTime(42 * ratio, time + 0.12 + dec * 0.1);
+    envAt(g, time, 1.0, atk, dec + 0.08, rel + 0.08);
+    osc.connect(g).connect(out);
     osc.start(time);
-    osc.stop(time + duration + 0.05);
+    osc.stop(time + atk + dec + rel + 0.2);
+
+    const click = audioCtx.createBufferSource();
+    click.buffer = noiseBuffer(0.012);
+    const hp = audioCtx.createBiquadFilter();
+    hp.type = 'highpass';
+    hp.frequency.value = 1800 * ratio;
+    const cg = audioCtx.createGain();
+    cg.gain.setValueAtTime(0.22, time);
+    cg.gain.exponentialRampToValueAtTime(0.0001, time + 0.012);
+    click.connect(hp).connect(cg).connect(out);
+    click.start(time);
+    click.stop(time + 0.02);
+    return;
   }
 
-  function triggerTrack(trackIndex, time = audioCtx.currentTime){
+  if(type === 'sd'){
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = noiseBuffer(0.28);
+    const bp = audioCtx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 2200 * ratio;
+    bp.Q.value = 0.8;
+    const ng = audioCtx.createGain();
+    envAt(ng, time, 0.78, atk, dec * 0.92, rel * 0.88);
+    noise.connect(bp).connect(ng).connect(out);
+    noise.start(time);
+    noise.stop(time + atk + dec + rel + 0.08);
+
+    [185, 332].forEach((f, i) => {
+      const osc = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      osc.type = i === 0 ? 'triangle' : 'sine';
+      osc.frequency.setValueAtTime(f * ratio, time);
+      osc.frequency.exponentialRampToValueAtTime(f * 0.72 * ratio, time + 0.085);
+      envAt(g, time, i === 0 ? 0.26 : 0.13, atk, dec * 0.58, rel * 0.36);
+      osc.connect(g).connect(out);
+      osc.start(time);
+      osc.stop(time + 0.2 + dec);
+    });
+    return;
+  }
+
+  if(type === 'rim'){
+    [470, 720, 1085].forEach((f, i) => {
+      const osc = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      osc.type = 'square';
+      osc.frequency.value = f * ratio;
+      envAt(g, time, 0.16 - i * 0.024, 0.0005, 0.026, 0.02 + rel * 0.25);
+      osc.connect(g).connect(out);
+      osc.start(time);
+      osc.stop(time + 0.06 + rel * 0.2);
+    });
+    return;
+  }
+
+  if(type === 'clp'){
+    [0, 0.021, 0.043].forEach((off, i) => {
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = noiseBuffer(0.12);
+      const bp = audioCtx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 1750 * ratio;
+      bp.Q.value = 1.2;
+      const g = audioCtx.createGain();
+      g.gain.setValueAtTime(0.0001, time + off);
+      g.gain.linearRampToValueAtTime(0.52 - i * 0.12, time + off + 0.001);
+      g.gain.exponentialRampToValueAtTime(0.0001, time + off + 0.04 + dec * 0.4);
+      noise.connect(bp).connect(g).connect(out);
+      noise.start(time + off);
+      noise.stop(time + off + 0.09 + dec * 0.45);
+    });
+    return;
+  }
+
+  if(type === 'chh' || type === 'ohh'){
+    const dur = type === 'ohh' ? 0.19 + dec + rel : 0.045 + dec * 0.34 + rel * 0.14;
+    [2, 3, 4.16, 5.43, 6.79, 8.21].forEach(mult => {
+      const osc = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      const hp = audioCtx.createBiquadFilter();
+      hp.type = 'highpass';
+      hp.frequency.value = 6500;
+      osc.type = 'square';
+      osc.frequency.value = 220 * mult * ratio;
+      g.gain.setValueAtTime(0.0001, time);
+      g.gain.linearRampToValueAtTime(0.072, time + 0.001);
+      g.gain.exponentialRampToValueAtTime(0.0001, time + dur);
+      osc.connect(g).connect(hp).connect(out);
+      osc.start(time);
+      osc.stop(time + dur + 0.02);
+    });
+    return;
+  }
+
+  if(type === 'pc1' || type === 'pc2'){
+    const base = type === 'pc1' ? 370 : 505;
+    [1, 1.52, 2.11].forEach((m, i) => {
+      const osc = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      osc.type = i === 1 ? 'triangle' : 'sine';
+      osc.frequency.setValueAtTime(base * m * ratio, time);
+      envAt(g, time, 0.19 - i * 0.03, 0.0008, 0.055 + dec * 0.18, 0.018 + rel * 0.12);
+      osc.connect(g).connect(out);
+      osc.start(time);
+      osc.stop(time + 0.11 + dec * 0.2);
+    });
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = noiseBuffer(0.05);
+    const bp = audioCtx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = (type === 'pc1' ? 1450 : 1950) * ratio;
+    bp.Q.value = 1.8;
+    const ng = audioCtx.createGain();
+    envAt(ng, time, type === 'pc1' ? 0.11 : 0.09, 0.0005, 0.018, 0.02);
+    noise.connect(bp).connect(ng).connect(out);
+    noise.start(time);
+    noise.stop(time + 0.06);
+    return;
+  }
+}
+
+function triggerTrack(trackIndex, time = audioCtx.currentTime){
+
     ensureAudio();
     const track = state.tracks[trackIndex];
     const anySolo = state.tracks.some(t => t.solo);
     if(track.mute) return;
     if(anySolo && !track.solo) return;
-    const tuneFactor = Math.pow(2, track.tune / 12);
 
-    switch(track.type){
-      case 'bd':
-        toneBurst(track, time, 145 * tuneFactor, 0.38 + track.r * 0.1, 'sine', 1.25, 44 * tuneFactor);
-        noiseBurst(track, time, 0.02, 'lowpass', 1400 * tuneFactor, 0.11);
-        break;
-      case 'sd':
-        toneBurst(track, time, 210 * tuneFactor, 0.11 + track.r * 0.06, 'triangle', 0.42, 170 * tuneFactor);
-        noiseBurst(track, time, 0.15 + track.r * 0.08, 'bandpass', 1800 * tuneFactor, 1.0);
-        break;
-      case 'rim':
-        toneBurst(track, time, 980 * tuneFactor, 0.03, 'square', 0.7);
-        toneBurst(track, time + 0.002, 1450 * tuneFactor, 0.025, 'square', 0.4);
-        break;
-      case 'clp':
-        noiseBurst(track, time, 0.05, 'bandpass', 2100 * tuneFactor, 0.85);
-        noiseBurst(track, time + 0.015, 0.045, 'bandpass', 1900 * tuneFactor, 0.65);
-        noiseBurst(track, time + 0.032, 0.035, 'bandpass', 1700 * tuneFactor, 0.5);
-        break;
-      case 'chh':
-        noiseBurst(track, time, 0.05 + track.r * 0.04, 'highpass', 5800 * tuneFactor, 0.62);
-        break;
-      case 'ohh':
-        noiseBurst(track, time, 0.22 + track.r * 0.22, 'highpass', 5200 * tuneFactor, 0.62);
-        break;
-      case 'pc1':
-        toneBurst(track, time, 390 * tuneFactor, 0.09 + track.r * 0.04, 'triangle', 0.55);
-        noiseBurst(track, time, 0.06, 'bandpass', 2400 * tuneFactor, 0.22);
-        break;
-      case 'pc2':
-        toneBurst(track, time, 610 * tuneFactor, 0.075 + track.r * 0.04, 'triangle', 0.48);
-        noiseBurst(track, time, 0.05, 'bandpass', 3100 * tuneFactor, 0.18);
-        break;
-      case 'smp': {
-        const slotIndex = Math.max(0, (track.lastTriggeredSlot || track.sampleSlot) - 1);
-        const buf = track.sampleBuffers[slotIndex];
-        if(buf){
-          const src = audioCtx.createBufferSource();
-          src.buffer = buf;
-          src.playbackRate.value = tuneFactor;
-          const amp = connectVoice(src, track);
-          src.connect(amp);
-          src.start(time);
-        } else {
-          noiseBurst(track, time, 0.06, 'bandpass', 1400, 0.42);
-        }
-        break;
-      }
+  const out = createTrackOutput(track);
+
+  if(track.type === 'smp'){
+    const slotIndex = Math.max(0, (track.lastTriggeredSlot || track.sampleSlot) - 1);
+    const buf = track.sampleBuffers[slotIndex];
+    if(buf){
+      const src = audioCtx.createBufferSource();
+      src.buffer = buf;
+      src.playbackRate.value = pitchRatio(track.tune);
+      src.connect(out);
+      src.start(time);
+    } else {
+      const ghost = audioCtx.createBufferSource();
+      ghost.buffer = noiseBuffer(0.05);
+      const bp = audioCtx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 1400;
+      const gg = audioCtx.createGain();
+      envAt(gg, time, 0.18, 0.0005, 0.02, 0.03);
+      ghost.connect(bp).connect(gg).connect(out);
+      ghost.start(time);
+      ghost.stop(time + 0.06);
     }
+    return;
   }
+
+  synthDrum(track.type, time, out, track);
+}
+
 
   function triggerMetronome(time){
     if(!state.met) return;
@@ -914,6 +746,7 @@
         e.preventDefault();
         st.sampleSlot = i;
         renderSampleSlots();
+        saveLocal();
       });
       wrap.appendChild(b);
     }
@@ -941,12 +774,14 @@
     const trackIndex = +e.currentTarget.dataset.track;
     const stepIndex = +e.currentTarget.dataset.step;
     const track = state.tracks[trackIndex];
+    state.currentTrack = trackIndex;
     snapshotForUndo();
     if(track.type === 'smp'){
       track.steps[stepIndex] = track.steps[stepIndex] === track.sampleSlot ? 0 : track.sampleSlot;
     } else {
       track.steps[stepIndex] = !track.steps[stepIndex];
     }
+    syncUiFromState();
     renderTracks();
     saveLocal();
   }
@@ -1224,7 +1059,7 @@
 
   async function registerSW(){
     if('serviceWorker' in navigator){
-      try{ await navigator.serviceWorker.register('./service-worker.js?v=2'); } catch(err){ console.warn(err); }
+      try{ await navigator.serviceWorker.register('./service-worker.js?v=3'); } catch(err){ console.warn(err); }
     }
   }
 
