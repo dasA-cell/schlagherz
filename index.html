@@ -8,8 +8,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Schlagherz" />
-<link rel="manifest" href="manifest.webmanifest?v=9" />
-<link rel="icon" href="icon-192.svg?v=9" type="image/svg+xml" />
+<link rel="manifest" href="manifest.webmanifest?v=10" />
+<link rel="icon" href="icon-192.svg?v=10" type="image/svg+xml" />
 <style>
 :root{
   --bg:#050705;--panel:#090d09;--line:#29412d;--line2:#476d4e;--text:#f5fbf5;--muted:#b8c6b8;
@@ -29,8 +29,8 @@ button{cursor:pointer}
   width:100vw;height:100dvh;
   padding:calc(env(safe-area-inset-top,0px) + 6px) calc(env(safe-area-inset-right,0px) + 8px) calc(env(safe-area-inset-bottom,0px) + 8px) calc(env(safe-area-inset-left,0px) + 8px);
   display:grid;
-  grid-template-rows:48px minmax(294px,35.5dvh) minmax(470px,47.5dvh) minmax(126px,13dvh);
-  gap:8px;
+  grid-template-rows:40px minmax(318px,39dvh) minmax(418px,40.5dvh) minmax(118px,11.5dvh);
+  gap:6px;
   overflow:hidden
 }
 .nameplate,.panel,.footer{
@@ -41,7 +41,7 @@ button{cursor:pointer}
 }
 .nameplate{
   position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0;
-  text-align:center;padding:2px 34px
+  text-align:center;padding:1px 28px
 }
 .nameplate::before,.nameplate::after{
   content:"";position:absolute;top:7px;width:8px;height:8px;border-radius:50%;
@@ -49,14 +49,14 @@ button{cursor:pointer}
   box-shadow:0 0 0 1px #1a221a,inset 0 0 4px rgba(255,255,255,.18)
 }
 .nameplate::before{left:12px}.nameplate::after{right:12px}
-.name{font-size:clamp(15px,2.75vw,21px);font-weight:900;letter-spacing:.18em;line-height:1}
-.subtitle{font-size:clamp(6px,0.96vw,8px);letter-spacing:.22em;text-transform:uppercase;opacity:.94;line-height:1.02}
-.panel{padding:7px}
-.head,.matrix-head{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:34px}
+.name{font-size:clamp(13px,2.25vw,17px);font-weight:900;letter-spacing:.16em;line-height:1}
+.subtitle{font-size:clamp(5px,0.82vw,7px);letter-spacing:.2em;text-transform:uppercase;opacity:.92;line-height:1.01}
+.panel{padding:6px}
+.head,.matrix-head{display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:30px}
 .badge{
-  display:inline-flex;align-items:center;justify-content:center;padding:7px 14px;min-height:34px;border-radius:999px;
+  display:inline-flex;align-items:center;justify-content:center;padding:6px 12px;min-height:30px;border-radius:999px;
   border:1px solid var(--line2);background:linear-gradient(180deg,#111711,#090b09);
-  font-size:11px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;white-space:nowrap;
+  font-size:10px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;
   box-shadow:0 4px 10px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.03)
 }
 .row-controls,.track-head-controls{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;justify-content:flex-end;min-width:0}
@@ -82,19 +82,19 @@ button{cursor:pointer}
 }
 .display-input::-webkit-outer-spin-button,.display-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .matrix-panel{display:grid;grid-template-rows:auto minmax(0,1fr);gap:6px}
-.matrix-wrap{min-height:0;display:grid;grid-template-rows:16px minmax(0,1fr);gap:3px;overflow:hidden}
-.step-header,.track-row{display:grid;grid-template-columns:82px repeat(16,minmax(0,1fr));gap:2px;align-items:center}
-.step-label{color:var(--muted);font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;text-align:left;padding-left:4px}
-.step-head{height:16px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;letter-spacing:.08em}
+.matrix-wrap{min-height:0;display:grid;grid-template-rows:15px minmax(0,1fr);gap:2px;overflow:hidden}
+.step-header,.track-row{display:grid;grid-template-columns:76px repeat(16,minmax(0,1fr));gap:2px;align-items:center}
+.step-label{color:var(--muted);font-size:8px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;text-align:left;padding-left:4px}
+.step-head{height:15px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;letter-spacing:.07em}
 .block-end{position:relative}
 .block-end::after{content:"";position:absolute;top:-4px;right:-2px;bottom:-4px;width:1px;background:linear-gradient(180deg,transparent,rgba(124,255,154,.78) 18%,rgba(124,255,154,.22) 50%,rgba(124,255,154,.78) 82%,transparent)}
-.tracks{min-height:0;display:grid;grid-auto-rows:28px;gap:1px;align-content:start;overflow:hidden}
+.tracks{min-height:0;display:grid;grid-auto-rows:24px;gap:1px;align-content:start;overflow:hidden}
 .track-label{
-  height:28px;min-height:28px;padding:0 6px;display:flex;align-items:center;justify-content:flex-start;
-  font-size:10px;font-weight:800;letter-spacing:.05em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+  height:24px;min-height:24px;padding:0 6px;display:flex;align-items:center;justify-content:flex-start;
+  font-size:9px;font-weight:800;letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap
 }
 .step-btn{
-  height:28px;min-height:28px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;
+  height:24px;min-height:24px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;
   border-color:#243624;background:linear-gradient(180deg,#101610,#050705);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.025),inset 0 -6px 10px rgba(0,0,0,.2)
 }
@@ -106,7 +106,7 @@ button{cursor:pointer}
   box-shadow:0 0 0 1px rgba(124,255,154,.4),0 0 16px rgba(73,216,110,.28),inset 0 1px 0 rgba(255,255,255,.24)
 }
 .step-btn.playing{outline:2px solid rgba(245,255,245,.92);outline-offset:-2px}
-.controls{min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.controls{min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .global-panel,.track-panel{display:grid;grid-template-rows:auto minmax(0,1fr);gap:6px;min-height:0}
 .group{
   min-width:0;min-height:0;border:1px solid #223422;border-radius:14px;
@@ -129,73 +129,58 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
   background:radial-gradient(circle at 35% 35%,#f3fff4 0%,#94ffae 34%,#4fdf70 64%,#1e6a34 100%);
   box-shadow:0 0 0 1px rgba(124,255,154,.26),0 0 16px rgba(73,216,110,.28)
 }
-.v-range{
-  -webkit-appearance:none;appearance:none;background:transparent;
-  position:absolute;left:50%;top:50%;
-  width:calc(var(--well-span, 176px) - 14px);height:34px;padding:0;margin:0;
-  transform:translate(-50%,-50%) rotate(-90deg);transform-origin:center center
-}
-.v-range::-webkit-slider-runnable-track{
-  height:10px;border-radius:999px;border:1px solid #314c37;background:linear-gradient(180deg,#162016,#090c09);
-  box-shadow:inset 0 1px 3px rgba(0,0,0,.4)
-}
-.v-range::-webkit-slider-thumb{
-  -webkit-appearance:none;width:26px;height:26px;margin-top:-9px;border-radius:50%;border:1px solid rgba(228,255,232,.55);
-  background:radial-gradient(circle at 35% 35%,#f3fff4 0%,#94ffae 34%,#4fdf70 64%,#1e6a34 100%);
-  box-shadow:0 0 0 1px rgba(124,255,154,.26),0 0 16px rgba(73,216,110,.28)
-}
-.v-range::-moz-range-track{
-  height:10px;border-radius:999px;border:1px solid #314c37;background:linear-gradient(180deg,#162016,#090c09)
-}
-.v-range::-moz-range-thumb{
-  width:26px;height:26px;border-radius:50%;border:1px solid rgba(228,255,232,.55);
-  background:radial-gradient(circle at 35% 35%,#f3fff4 0%,#94ffae 34%,#4fdf70 64%,#1e6a34 100%);
-  box-shadow:0 0 0 1px rgba(124,255,154,.26),0 0 16px rgba(73,216,110,.28)
-}
+
 .global-grid{
-  min-height:0;display:grid;grid-template-columns:112px 64px 52px 52px 52px;grid-template-rows:minmax(0,1fr) auto;
+  min-height:0;display:grid;grid-template-columns:104px 90px 56px 48px 48px 48px 176px;grid-template-rows:auto auto;
   gap:8px;align-items:start
 }
-.global-fields{padding:8px;display:grid;grid-template-rows:repeat(4,auto);gap:8px;align-content:start}
-.global-field{display:grid;gap:4px}
-.fader-col{display:grid;gap:8px;align-content:start;justify-items:center}
+.global-fields{padding:8px;display:grid;grid-template-rows:repeat(4,auto);gap:6px;align-content:start;grid-column:1 / span 2;grid-row:1}
+.global-field{display:grid;gap:3px}
+.fader-col{display:grid;gap:6px;align-content:start;justify-items:center}
 .master-well,.track-well{
-  --well-span:176px;
-  position:relative;width:42px;display:block;padding:0;border-radius:14px;
+  position:relative;width:38px;display:block;padding:6px 0;border-radius:14px;
   background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0)),linear-gradient(180deg,#0a100a,#050705);
   border:1px solid #223422;box-shadow:inset 0 1px 0 rgba(255,255,255,.025),inset 0 -8px 12px rgba(0,0,0,.14);overflow:hidden
 }
-.master-well{height:196px;--well-span:188px}
-.track-well{height:186px;--well-span:178px}
+.master-well{height:164px}
+.track-well{height:148px}
+.v-range{position:absolute;inset:0;opacity:0;pointer-events:none}
+.v-slider-ui{position:absolute;left:50%;top:8px;bottom:8px;transform:translateX(-50%);width:30px;touch-action:none;user-select:none;-webkit-user-select:none}
+.v-slider-groove,.v-slider-fill{position:absolute;left:50%;transform:translateX(-50%);width:10px;border-radius:999px}
+.v-slider-groove{top:0;bottom:0;border:1px solid #314c37;background:linear-gradient(180deg,#162016,#090c09);box-shadow:inset 0 1px 3px rgba(0,0,0,.4)}
+.v-slider-fill{bottom:0;height:0;background:linear-gradient(180deg,rgba(148,255,174,.86),rgba(79,223,112,.34));box-shadow:0 0 10px rgba(73,216,110,.22)}
+.v-slider-knob{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:24px;height:24px;border-radius:50%;border:1px solid rgba(228,255,232,.55);background:radial-gradient(circle at 35% 35%,#f3fff4 0%,#94ffae 34%,#4fdf70 64%,#1e6a34 100%);box-shadow:0 0 0 1px rgba(124,255,154,.26),0 0 16px rgba(73,216,110,.28)}
 .global-actions-left,.global-actions-mid,.global-actions-right{display:grid;gap:8px;align-content:start}
 .global-actions-left,.global-actions-mid{grid-template-rows:repeat(4,38px)}
+.global-actions-left{grid-column:1;grid-row:2}
+.global-actions-mid{grid-column:2;grid-row:2}
 .global-actions-right{
-  grid-column:3 / span 3;grid-template-columns:repeat(2,82px);grid-auto-rows:minmax(40px,auto);gap:8px;align-items:start;justify-content:end
+  grid-column:7;grid-row:1 / span 2;grid-template-columns:repeat(2,84px);grid-template-rows:40px 44px 84px;gap:8px;align-items:start;justify-content:end
 }
-.global-actions-right .wide{grid-column:auto}
+.global-actions-right .wide{grid-column:1 / span 2}
 .global-actions-right .wav-btn{
-  width:82px;min-height:44px;justify-self:end;padding:6px 6px;line-height:1.1;white-space:normal
+  grid-column:1 / span 2;width:100%;min-height:44px;justify-self:stretch;padding:6px 6px;line-height:1.1;white-space:normal
 }
 .global-actions-right .start-btn{
-  width:82px;min-height:82px;justify-self:end;padding:6px 6px;line-height:1.15;aspect-ratio:1 / 1
+  grid-column:1 / span 2;width:100%;min-height:84px;justify-self:stretch;padding:6px 6px;line-height:1.15;aspect-ratio:auto
 }
-.track-panel .head{display:grid;grid-template-columns:auto minmax(124px, 1fr) auto;gap:8px;align-items:center}
-.clear-track-btn{justify-self:center;min-width:122px}
-.track-display{justify-self:end;max-width:150px}
-.track-body{min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:8px}
-.track-top{display:grid;grid-template-columns:minmax(0,1fr) 52px;gap:8px;align-items:start}
-.pan-card{padding:8px;display:grid;gap:6px}
+.track-panel .head{display:grid;grid-template-columns:auto minmax(118px,1fr) auto;gap:6px;align-items:center}
+.clear-track-btn{justify-self:center;min-width:116px}
+.track-display{justify-self:end;max-width:144px}
+.track-body{min-height:0;display:grid;grid-template-rows:auto auto auto;gap:6px}
+.track-top{display:grid;grid-template-columns:minmax(0,1fr) 48px;gap:6px;align-items:start}
+.pan-card{padding:7px;display:grid;gap:5px}
 .pan-top{display:grid;grid-template-columns:12px 1fr 12px;gap:6px;align-items:center}
 .pan-title{text-align:center;font-size:9px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}
-.track-main{padding:8px;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:8px;min-height:0}
+.track-main{padding:7px;display:grid;grid-template-rows:auto auto;gap:6px;min-height:0}
 .track-fader-bank{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;justify-items:center;align-content:start;min-height:0}
-.track-status{font-size:10px;color:var(--muted);padding:0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:14px}
-.track-bottom{display:grid;grid-template-columns:minmax(0,1fr) 80px 76px;gap:8px;align-items:end}
-.start-card{padding:8px;display:grid;gap:6px}
-.start-inline{display:grid;grid-template-columns:minmax(0,1fr) 52px;gap:8px;align-items:center}
-.step-len-card{padding:6px;display:grid;gap:6px}
-.start-trk-btn{min-height:72px;aspect-ratio:1 / 1;padding:6px}
-.footer{padding:6px;display:grid;grid-template-columns:minmax(0,1fr) 92px minmax(0,1fr);gap:6px;align-items:stretch}
+.track-status{font-size:10px;color:var(--muted);padding:0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:12px}
+.track-bottom{display:grid;grid-template-columns:minmax(0,1fr) 72px 70px;gap:6px;align-items:end}
+.start-card{padding:7px;display:grid;gap:5px}
+.start-inline{display:grid;grid-template-columns:minmax(0,1fr) 48px;gap:6px;align-items:center}
+.step-len-card{padding:6px;display:grid;gap:5px}
+.start-trk-btn{min-height:68px;aspect-ratio:1 / 1;padding:6px}
+.footer{padding:6px;display:grid;grid-template-columns:minmax(0,1fr) 88px minmax(0,1fr);gap:6px;align-items:stretch}
 .slot-zone,.perf-zone{border:1px solid #223422;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0)),linear-gradient(180deg,#0c110c,#070907);box-shadow:inset 0 1px 0 rgba(255,255,255,.025),inset 0 -10px 16px rgba(0,0,0,.16)}
 .slot-zone{padding:6px;display:grid;grid-template-rows:1fr 1fr;gap:6px}.slot-row,.perf-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.perf-zone{padding:6px;display:grid;grid-template-rows:1fr 1fr;gap:6px}.perf-row{grid-template-columns:repeat(3,minmax(0,1fr))}
 .rec-btn{display:flex;align-items:center;justify-content:center;text-align:center;min-height:100%;font-size:12px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;line-height:1.2}
@@ -204,13 +189,13 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
 .export-note{font-size:12px;line-height:1.45;color:var(--muted)}
 .export-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 @media (max-width: 940px){
-  .app{grid-template-rows:46px minmax(286px,35dvh) minmax(468px,48dvh) minmax(124px,13dvh)}
-  .step-header,.track-row{grid-template-columns:78px repeat(16,minmax(0,1fr))}
-  .tracks{grid-auto-rows:27px}
-  .step-btn,.track-label{height:27px;min-height:27px}
-  .global-grid{grid-template-columns:106px 62px 50px 50px 50px}
-  .master-well{height:188px;--well-span:180px}
-  .track-well{height:178px;--well-span:170px}
+  .app{grid-template-rows:38px minmax(308px,38.5dvh) minmax(408px,40dvh) minmax(114px,11.5dvh)}
+  .step-header,.track-row{grid-template-columns:72px repeat(16,minmax(0,1fr))}
+  .tracks{grid-auto-rows:23px}
+  .step-btn,.track-label{height:23px;min-height:23px}
+  .global-grid{grid-template-columns:98px 84px 54px 46px 46px 46px 170px}
+  .master-well{height:158px}
+  .track-well{height:142px}
 }
 </style>
 </head>
@@ -367,7 +352,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     { code:'A', name:'BD',  type:'bd'  },
   ];
   const TOTAL_STEPS = 32;
-  const STORE = 'schlagherz-pwa-v9-state';
+  const STORE = 'schlagherz-pwa-v10-state';
   const SR = 44100;
 
   const defaults = {
@@ -411,6 +396,8 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     sampleProcessor: null,
     sampleSource: null,
     sampleChunks: [],
+    sampleRecTimer: null,
+    sampleMonitorGain: null,
     manualRecordCursor: 0,
     liveRec: false,
     tracks: TRACKS.map(t => ({
@@ -432,6 +419,45 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
   const $ = (id) => document.getElementById(id);
   const deep = (x) => JSON.parse(JSON.stringify(x));
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+  let verticalSliders = [];
+  function stepPrecision(step){ const s = String(step ?? ''); return s.includes('.') ? s.split('.')[1].length : 0; }
+  function normalizeRangeValue(input, raw){
+    const min = Number(input.min || 0), max = Number(input.max || 100), step = Number(input.step || 0);
+    let value = clamp(raw, min, max);
+    if(step > 0){ value = Math.round((value - min) / step) * step + min; value = +clamp(+value.toFixed(stepPrecision(step)), min, max); }
+    return value;
+  }
+  function syncVerticalSlider(input){
+    const ui = input.parentElement?.querySelector('.v-slider-ui'); if(!ui) return;
+    const fill = ui.querySelector('.v-slider-fill'), knob = ui.querySelector('.v-slider-knob');
+    const min = Number(input.min || 0), max = Number(input.max || 100), value = Number(input.value || 0);
+    const ratio = max === min ? 0 : clamp((value - min) / (max - min), 0, 1);
+    const usable = Math.max(1, ui.clientHeight - 24); const top = 12 + (1 - ratio) * usable;
+    knob.style.top = `${top}px`; fill.style.height = `${12 + ratio * usable}px`;
+  }
+  function setVerticalFromPointer(input, clientY, emitChange = false){
+    const ui = input.parentElement?.querySelector('.v-slider-ui'); if(!ui) return;
+    const rect = ui.getBoundingClientRect(), pad = 12, usable = Math.max(1, rect.height - pad * 2);
+    const y = clamp(clientY - rect.top - pad, 0, usable), ratio = 1 - (y / usable);
+    const min = Number(input.min || 0), max = Number(input.max || 100);
+    const value = normalizeRangeValue(input, min + ratio * (max - min));
+    if(String(value) != String(input.value)){ input.value = String(value); input.dispatchEvent(new Event('input', {bubbles:true})); }
+    syncVerticalSlider(input); if(emitChange) input.dispatchEvent(new Event('change', {bubbles:true}));
+  }
+  function initVerticalSliders(){
+    verticalSliders = Array.from(document.querySelectorAll('input.v-range'));
+    verticalSliders.forEach(input => {
+      const holder = input.parentElement; if(holder.querySelector('.v-slider-ui')) return;
+      const ui = document.createElement('div'); ui.className = 'v-slider-ui'; ui.innerHTML = '<div class="v-slider-groove"></div><div class="v-slider-fill"></div><div class="v-slider-knob"></div>';
+      holder.appendChild(ui);
+      ui.addEventListener('pointerdown', e => { e.preventDefault(); try{ ui.setPointerCapture(e.pointerId); }catch(_e){} setVerticalFromPointer(input, e.clientY); });
+      ui.addEventListener('pointermove', e => { if(ui.hasPointerCapture?.(e.pointerId)) setVerticalFromPointer(input, e.clientY); });
+      const fin = e => { if(typeof e.clientY === 'number') setVerticalFromPointer(input, e.clientY, true); try{ if(ui.hasPointerCapture?.(e.pointerId)) ui.releasePointerCapture(e.pointerId); }catch(_e){} };
+      ui.addEventListener('pointerup', fin); ui.addEventListener('pointercancel', fin); input.addEventListener('input', () => syncVerticalSlider(input)); syncVerticalSlider(input);
+    });
+  }
+  function syncVerticalSliders(){ verticalSliders.forEach(syncVerticalSlider); }
 
   function getTrackLen(track){
     return clamp(Math.round(track.stepsLen || state.patternLength), 1, state.patternLength);
@@ -488,7 +514,8 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
   }
   function restoreSnapshot(snap){
     const wasPlaying = state.playing;
-    stop();
+    const carryStep = state.playhead % Math.max(1, snap.patternLength ?? state.patternLength ?? 16);
+    if(state.timer){ clearInterval(state.timer); state.timer = null; }
     Object.assign(state, {
       patternLength: snap.patternLength ?? 16,
       page: snap.page ?? 0,
@@ -509,8 +536,19 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       clampTrackState(state.tracks[i]);
     });
     if(audioCtx) hydrate();
+    state.playhead = carryStep % state.patternLength;
+    state.lastScheduledStep = (state.playhead - 1 + state.patternLength) % state.patternLength;
     renderAll();
-    if(wasPlaying) start();
+    if(wasPlaying && audioCtx){
+      state.playing = true;
+      state.nextNoteTime = audioCtx.currentTime + .035;
+      state.timer = setInterval(tick, 25);
+      $('transportDisplay').textContent = 'RUN';
+    } else {
+      state.playing = false;
+      $('transportDisplay').textContent = 'STOP';
+      stepEls.flat().forEach(b => b.classList.remove('playing'));
+    }
   }
   function undo(){
     const snap = state.undoStack.pop();
@@ -724,9 +762,11 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       return;
     }
     if(type === 'sd'){
-      burst(.22 + d * .08, 'bandpass', 2100 * rr, 1.1, .82);
-      tone('triangle', 195 * rr, 154 * rr, .28, .13 + d * .1);
-      tone('sine', 330 * rr, 265 * rr, .12, .09 + d * .06);
+      const len = .16 + d * .08 + r * .04;
+      burst(len, 'highpass', 1600 * rr, .45, .68, 0, {type:'bandpass', freq:2450 * rr, q:1.05});
+      burst(len * .72, 'bandpass', 1880 * rr, 1.15, .34, .003);
+      tone('triangle', 318 * rr, 206 * rr, .16, .08 + d * .04);
+      tone('sine', 188 * rr, 158 * rr, .09, .06 + d * .03, .001);
       return;
     }
     if(type === 'rim'){
@@ -883,7 +923,8 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       const label = document.createElement('button');
       label.className = 'track-label' + (state.currentTrack === ti ? ' selected' : '');
       label.textContent = `TRK ${t.code}: ${t.name}`;
-      label.addEventListener('pointerdown', (e) => { e.preventDefault(); state.currentTrack = ti; syncUi(); drawTracks(); drawSlots(); });
+      if(t.solo) label.textContent += ' • SOLO'; else if(t.mute) label.textContent += ' • MUTE';
+      label.addEventListener('pointerdown', (e) => { e.preventDefault(); const prev = state.tracks[state.currentTrack]; state.currentTrack = ti; if(prev?.solo){ state.tracks.forEach((x, idx) => x.solo = idx === ti); } syncUi(); drawTracks(); drawSlots(); save(); });
       row.appendChild(label); trackEls.push(label);
       const rowSteps = []; const start = state.page * 16;
       for(let i = 0; i < 16; i++){
@@ -900,6 +941,11 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     const start = state.page * 16;
     state.tracks.forEach((t, ti) => {
       trackEls[ti]?.classList.toggle('selected', state.currentTrack === ti);
+      trackEls[ti]?.classList.toggle('active', !!t.solo);
+      if(trackEls[ti]){
+        trackEls[ti].style.opacity = t.mute ? '.48' : '1';
+        trackEls[ti].textContent = `TRK ${t.code}: ${t.name}${t.solo ? ' • SOLO' : (t.mute ? ' • MUTE' : '')}`;
+      }
       const len = getTrackLen(t);
       for(let i = 0; i < 16; i++){
         const abs = start + i, b = stepEls[ti][i], locked = abs >= len, on = !locked && (t.type === 'smp' ? t.steps[abs] > 0 : !!t.steps[abs]);
@@ -953,6 +999,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     $('quantBtn').classList.toggle('active', t.quant);
     $('liveRecBtn').classList.toggle('active', state.liveRec);
     $('recSlotBtn').classList.toggle('active', state.sampleRecReady || state.sampleRecording);
+    syncVerticalSliders();
   }
   function renderAll(){
     if(state.renderLock) return;
@@ -971,7 +1018,10 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     const ti = +e.currentTarget.dataset.track, si = +e.currentTarget.dataset.step, t = state.tracks[ti];
     const len = getTrackLen(t);
     if(si >= len) return;
-    state.currentTrack = ti; snapshot();
+    const prev = state.tracks[state.currentTrack];
+    state.currentTrack = ti;
+    if(prev?.solo){ state.tracks.forEach((x, idx) => x.solo = idx === ti); }
+    snapshot();
     if(t.type === 'smp') t.steps[si] = t.steps[si] === state.tracks[0].sampleSlot ? 0 : state.tracks[0].sampleSlot;
     else t.steps[si] = !t.steps[si];
     syncUi(); drawTracks(); drawSlots(); save();
@@ -1123,6 +1173,15 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     setTimeout(() => { $('transportDisplay').textContent = state.playing ? 'RUN' : 'STOP'; }, 900);
   }
 
+  function disarmRec(message = ''){
+    try{ state.sampleSource && state.sampleSource.disconnect(); }catch(_e){}
+    try{ state.sampleProcessor && state.sampleProcessor.disconnect(); }catch(_e){}
+    try{ state.sampleMonitorGain && state.sampleMonitorGain.disconnect(); }catch(_e){}
+    if(state.sampleRecTimer){ clearTimeout(state.sampleRecTimer); state.sampleRecTimer = null; }
+    if(state.sampleStream){ try{ state.sampleStream.getTracks().forEach(t => t.stop()); }catch(_e){} }
+    state.sampleStream = null; state.sampleSource = null; state.sampleProcessor = null; state.sampleMonitorGain = null; state.sampleRecording = false; state.sampleRecReady = false;
+    syncUi(); if(message) $('trackStatus').textContent = message;
+  }
   async function ensureStream(){
     if(state.sampleStream) return state.sampleStream;
     state.sampleStream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true, noiseSuppression:true, autoGainControl:true}});
@@ -1131,7 +1190,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
   async function armRec(){
     try{
       await ensureStream(); state.sampleRecReady = true; syncUi();
-      $('trackStatus').textContent = 'Sampler bereit. REC SMPL SLOT erneut drücken, um in den gewählten Slot aufzunehmen.';
+      $('trackStatus').textContent = 'Sampler bereit. REC SMPL SLOT erneut drücken, um in den gewählten Slot aufzunehmen. Danach wird das Mikro wieder deaktiviert.';
     } catch(err){
       console.warn(err); state.sampleRecReady = false; syncUi(); $('trackStatus').textContent = 'Mikrofonzugriff fehlgeschlagen.';
     }
@@ -1139,21 +1198,23 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
   async function startRec(){
     try{
       ensureAudio(); if(audioCtx.state === 'suspended') await audioCtx.resume();
-      const stream = await ensureStream(), source = audioCtx.createMediaStreamSource(stream), proc = audioCtx.createScriptProcessor(2048, 1, 1), chunks = [];
-      state.sampleChunks = chunks; state.sampleRecording = true; state.sampleRecReady = false; state.sampleSource = source; state.sampleProcessor = proc; syncUi();
+      const stream = await ensureStream(), source = audioCtx.createMediaStreamSource(stream), proc = audioCtx.createScriptProcessor(2048, 1, 1), monitor = audioCtx.createGain(), chunks = [];
+      monitor.gain.value = 0;
+      state.sampleChunks = chunks; state.sampleRecording = true; state.sampleRecReady = false; state.sampleSource = source; state.sampleProcessor = proc; state.sampleMonitorGain = monitor; syncUi();
       $('trackStatus').textContent = 'Aufnahme läuft …';
       proc.onaudioprocess = e => chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
-      source.connect(proc); proc.connect(audioCtx.destination); setTimeout(finishRec, 700);
+      source.connect(proc); proc.connect(monitor); monitor.connect(audioCtx.destination); state.sampleRecTimer = setTimeout(finishRec, 700);
     } catch(err){
       console.warn(err); state.sampleRecording = false; state.sampleRecReady = false; syncUi(); $('trackStatus').textContent = 'Sample-Aufnahme fehlgeschlagen.';
     }
   }
   function finishRec(){
     if(!state.sampleRecording) return;
-    try{ state.sampleSource && state.sampleSource.disconnect(); state.sampleProcessor && state.sampleProcessor.disconnect(); }catch(_e){}
+    try{ state.sampleSource && state.sampleSource.disconnect(); state.sampleProcessor && state.sampleProcessor.disconnect(); state.sampleMonitorGain && state.sampleMonitorGain.disconnect(); }catch(_e){}
+    if(state.sampleRecTimer){ clearTimeout(state.sampleRecTimer); state.sampleRecTimer = null; }
     const total = state.sampleChunks.reduce((s, a) => s + a.length, 0);
     if(total < 32){
-      state.sampleChunks = []; state.sampleRecording = false; state.sampleProcessor = null; state.sampleSource = null; syncUi(); $('trackStatus').textContent = 'Zu wenig Eingangssignal für eine Sample-Aufnahme.'; return;
+      state.sampleChunks = []; disarmRec('Zu wenig Eingangssignal für eine Sample-Aufnahme.'); return;
     }
     const mono = new Float32Array(total); let offset = 0;
     state.sampleChunks.forEach(a => { mono.set(a, offset); offset += a.length; });
@@ -1165,8 +1226,8 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     }
     const smp = state.tracks[0];
     smp.sampleBuffers[smp.sampleSlot - 1] = b;
-    state.sampleChunks = []; state.sampleRecording = false; state.sampleProcessor = null; state.sampleSource = null; syncUi(); drawSlots(); save();
-    $('trackStatus').textContent = `Sample in Slot ${smp.sampleSlot} gespeichert. Mit TRIGGER kann er sofort abgespielt werden.`;
+    state.sampleChunks = []; drawSlots(); save();
+    disarmRec(`Sample in Slot ${smp.sampleSlot} gespeichert. Mikrofon wieder deaktiviert.`);
   }
 
   function bindTrackRange(id, prop, parse = v => +v){
@@ -1247,8 +1308,8 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       syncUi(); drawTracks(); save(); $('trackStatus').textContent = `TRK ${t.code}: ${t.name} läuft nun über ${t.stepsLen} Steps. Schritte außerhalb dieses Bereichs sind gesperrt.`;
     });
 
-    $('muteBtn').addEventListener('pointerdown', e => { e.preventDefault(); const t = state.tracks[state.currentTrack]; t.mute = !t.mute; syncUi(); save(); });
-    $('soloBtn').addEventListener('pointerdown', e => { e.preventDefault(); const t = state.tracks[state.currentTrack]; t.solo = !t.solo; syncUi(); save(); });
+    $('muteBtn').addEventListener('pointerdown', e => { e.preventDefault(); const t = state.tracks[state.currentTrack]; t.mute = !t.mute; syncUi(); drawTracks(); save(); });
+    $('soloBtn').addEventListener('pointerdown', e => { e.preventDefault(); const t = state.tracks[state.currentTrack]; const next = !t.solo; state.tracks.forEach(x => x.solo = false); t.solo = next; syncUi(); drawTracks(); save(); });
     $('quantBtn').addEventListener('pointerdown', e => { e.preventDefault(); const t = state.tracks[state.currentTrack]; t.quant = !t.quant; syncUi(); save(); });
     $('liveRecBtn').addEventListener('pointerdown', e => { e.preventDefault(); state.liveRec = !state.liveRec; syncUi(); save(); $('trackStatus').textContent = state.liveRec ? 'LIVE REC aktiv. TRIGGER schreibt nun Steps in den ausgewählten Track.' : 'LIVE REC aus.'; });
     $('triggerBtn').addEventListener('pointerdown', e => {
@@ -1277,11 +1338,12 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
 
   async function sw(){
     if('serviceWorker' in navigator){
-      try{ await navigator.serviceWorker.register('./service-worker.js?v=9'); }catch(err){ console.warn(err); }
+      try{ await navigator.serviceWorker.register('./service-worker.js?v=10'); }catch(err){ console.warn(err); }
     }
   }
 
   load();
+  initVerticalSliders();
   bind();
   renderAll();
   sw();
