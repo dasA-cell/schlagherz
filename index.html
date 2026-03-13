@@ -405,6 +405,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     sampleSource: null,
     sampleChunks: [],
     sampleRecTimer: null,
+    sampleForceStopTimer: null,
     sampleMonitorGain: null,
     sampleTriggerBlockUntil: 0,
     manualRecordCursor: 0,
@@ -866,28 +867,34 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       const s = audioCtx.createBufferSource();
       const g = audioCtx.createGain();
       const rate = ratio(t.tune);
-      const playDur = Math.max(.04, buf.duration / Math.max(.125, rate));
+      const playDur = Math.max(.05, buf.duration / Math.max(.125, rate));
       const aNorm = clamp((+t.a || 0) / .2, 0, 1);
       const dNorm = clamp(((+t.d || .02) - .02) / 1.38, 0, 1);
       const rNorm = clamp(((+t.r || .02) - .02) / 1.38, 0, 1);
-      const attackTime = Math.max(.001, .002 + aNorm * Math.min(.24, playDur * .48));
-      const attackEnd = Math.min(when + attackTime, when + Math.max(.01, playDur * .42));
-      const sustain = clamp(.9 - dNorm * .38, .46, .92);
-      const decayTime = Math.max(.01, .02 + dNorm * Math.min(.42, playDur * .52));
-      const decayEnd = Math.min(when + Math.max(.03, playDur * .82), attackEnd + decayTime);
-      const releaseStart = Math.max(decayEnd, when + playDur * (.26 + rNorm * .66));
-      const endTime = Math.min(when + playDur + .01, Math.max(releaseStart + .012, when + playDur * (.38 + rNorm * .62)));
+      const attackTime = Math.min(Math.max(.001, aNorm * Math.min(.65, playDur * .88)), Math.max(.002, playDur * .9));
+      const attackEnd = when + attackTime;
+      const sustain = clamp(1 - dNorm * .82, .14, 1);
+      const maxBody = Math.max(.02, playDur - attackTime - .012);
+      const decayTime = Math.min(maxBody, Math.max(.01, dNorm * Math.min(.52, playDur * .72)));
+      const decayEnd = attackEnd + decayTime;
+      const releaseTail = Math.max(.02, .02 + rNorm * Math.min(.6, playDur * .95));
+      const releaseStart = Math.min(Math.max(decayEnd, when + Math.max(.01, playDur - releaseTail)), when + playDur - .006);
+      const endTime = releaseStart + releaseTail;
       s.buffer = buf;
       s.playbackRate.value = rate;
       g.gain.cancelScheduledValues(when);
       g.gain.setValueAtTime(0.0001, when);
-      g.gain.linearRampToValueAtTime(1, attackEnd);
+      if(attackTime <= .002){
+        g.gain.setValueAtTime(1, when + .002);
+      } else {
+        g.gain.linearRampToValueAtTime(1, attackEnd);
+      }
       g.gain.linearRampToValueAtTime(sustain, decayEnd);
       g.gain.setValueAtTime(sustain, releaseStart);
       g.gain.exponentialRampToValueAtTime(0.0001, endTime);
       s.connect(g).connect(o);
       s.start(when);
-      s.stop(endTime + .01);
+      s.stop(endTime + .02);
       return;
     }
     drum(audioCtx, chain, t.type, when, t);
@@ -1343,10 +1350,12 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
   }
 
   function disarmRec(message = ''){
+    try{ if(state.sampleProcessor) state.sampleProcessor.onaudioprocess = null; }catch(_e){}
     try{ state.sampleSource && state.sampleSource.disconnect(); }catch(_e){}
     try{ state.sampleProcessor && state.sampleProcessor.disconnect(); }catch(_e){}
     try{ state.sampleMonitorGain && state.sampleMonitorGain.disconnect(); }catch(_e){}
     if(state.sampleRecTimer){ clearTimeout(state.sampleRecTimer); state.sampleRecTimer = null; }
+    if(state.sampleForceStopTimer){ clearTimeout(state.sampleForceStopTimer); state.sampleForceStopTimer = null; }
     if(state.sampleStream){ try{ state.sampleStream.getTracks().forEach(t => t.stop()); }catch(_e){} }
     state.sampleStream = null; state.sampleSource = null; state.sampleProcessor = null; state.sampleMonitorGain = null; state.sampleRecording = false; state.sampleRecReady = false;
     if(audioCtx){
@@ -1375,19 +1384,30 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       monitor.gain.setValueAtTime(0, audioCtx.currentTime);
       state.sampleChunks = chunks; state.sampleRecording = true; state.sampleRecReady = false; state.sampleSource = source; state.sampleProcessor = proc; state.sampleMonitorGain = monitor; syncUi();
       $('trackStatus').textContent = 'Aufnahme läuft …';
-      proc.onaudioprocess = e => chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
-      source.connect(proc); proc.connect(monitor); monitor.connect(audioCtx.destination); state.sampleRecTimer = setTimeout(finishRec, 700);
+      proc.onaudioprocess = e => {
+        const data = e.inputBuffer.getChannelData(0);
+        if(data && data.length) chunks.push(new Float32Array(data));
+      };
+      source.connect(proc); proc.connect(monitor); monitor.connect(audioCtx.destination);
+      state.sampleRecTimer = setTimeout(() => finishRec('auto'), 700);
+      state.sampleForceStopTimer = setTimeout(() => {
+        if(state.sampleRecording) finishRec('fallback');
+      }, 1300);
     } catch(err){
       console.warn(err); state.sampleRecording = false; state.sampleRecReady = false; syncUi(); $('trackStatus').textContent = 'Sample-Aufnahme fehlgeschlagen.';
     }
   }
-  function finishRec(){
+  function finishRec(reason = 'manual'){
     if(!state.sampleRecording) return;
+    try{ if(state.sampleProcessor) state.sampleProcessor.onaudioprocess = null; }catch(_e){}
     try{ state.sampleSource && state.sampleSource.disconnect(); state.sampleProcessor && state.sampleProcessor.disconnect(); state.sampleMonitorGain && state.sampleMonitorGain.disconnect(); }catch(_e){}
     if(state.sampleRecTimer){ clearTimeout(state.sampleRecTimer); state.sampleRecTimer = null; }
+    if(state.sampleForceStopTimer){ clearTimeout(state.sampleForceStopTimer); state.sampleForceStopTimer = null; }
     const total = state.sampleChunks.reduce((s, a) => s + a.length, 0);
     if(total < 32){
-      state.sampleChunks = []; disarmRec('Zu wenig Eingangssignal für eine Sample-Aufnahme.'); return;
+      state.sampleChunks = [];
+      disarmRec(reason === 'fallback' ? 'Aufnahme beendet, aber es kam kein brauchbares Eingangssignal an.' : 'Zu wenig Eingangssignal für eine Sample-Aufnahme.');
+      return;
     }
     const mono = new Float32Array(total); let offset = 0;
     state.sampleChunks.forEach(a => { mono.set(a, offset); offset += a.length; });
@@ -1557,7 +1577,12 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       syncUi(); drawTracks(); save();
     });
 
-    $('recSlotBtn').addEventListener('pointerdown', async e => { e.preventDefault(); if(!state.sampleRecReady && !state.sampleRecording) await armRec(); else if(!state.sampleRecording) await startRec(); });
+    $('recSlotBtn').addEventListener('pointerdown', async e => {
+      e.preventDefault();
+      if(state.sampleRecording){ finishRec('manual'); return; }
+      if(!state.sampleRecReady){ await armRec(); return; }
+      await startRec();
+    });
 
     slotEls = Array.from(document.querySelectorAll('[data-slot]'));
     slotEls.forEach((b, idx) => b.addEventListener('pointerdown', e => {
