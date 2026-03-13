@@ -8,8 +8,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Schlagherz" />
-<link rel="manifest" href="manifest.webmanifest?v=10" />
-<link rel="icon" href="icon-192.svg?v=10" type="image/svg+xml" />
+<link rel="manifest" href="manifest.webmanifest?v=11" />
+<link rel="icon" href="icon-192.svg?v=11" type="image/svg+xml" />
 <style>
 :root{
   --bg:#050705;--panel:#090d09;--line:#29412d;--line2:#476d4e;--text:#f5fbf5;--muted:#b8c6b8;
@@ -29,7 +29,7 @@ button{cursor:pointer}
   width:100vw;height:100dvh;
   padding:calc(env(safe-area-inset-top,0px) + 6px) calc(env(safe-area-inset-right,0px) + 8px) calc(env(safe-area-inset-bottom,0px) + 8px) calc(env(safe-area-inset-left,0px) + 8px);
   display:grid;
-  grid-template-rows:40px minmax(318px,39dvh) minmax(418px,40.5dvh) minmax(118px,11.5dvh);
+  grid-template-rows:40px minmax(340px,41.2dvh) minmax(392px,38.2dvh) minmax(108px,10.2dvh);
   gap:6px;
   overflow:hidden
 }
@@ -49,8 +49,8 @@ button{cursor:pointer}
   box-shadow:0 0 0 1px #1a221a,inset 0 0 4px rgba(255,255,255,.18)
 }
 .nameplate::before{left:12px}.nameplate::after{right:12px}
-.name{font-size:clamp(13px,2.25vw,17px);font-weight:900;letter-spacing:.16em;line-height:1}
-.subtitle{font-size:clamp(5px,0.82vw,7px);letter-spacing:.2em;text-transform:uppercase;opacity:.92;line-height:1.01}
+.name{font-size:clamp(12px,2vw,16px);font-weight:900;letter-spacing:.14em;line-height:1}
+.subtitle{font-size:clamp(4px,0.74vw,6px);letter-spacing:.18em;text-transform:uppercase;opacity:.92;line-height:1.01}
 .panel{padding:6px}
 .head,.matrix-head{display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:30px}
 .badge{
@@ -66,7 +66,7 @@ button{cursor:pointer}
   color:var(--text);box-shadow:0 4px 12px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.03)
 }
 .btn,.mini-btn,.toggle,.slot-btn,.rec-btn,.step-btn,.track-label{user-select:none;-webkit-user-select:none}
-.btn,.mini-btn,.toggle,.slot-btn{min-height:34px;padding:6px 10px;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.btn,.mini-btn,.toggle,.slot-btn{min-height:34px;padding:5px 8px;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
 .btn.big{min-height:60px;font-size:13px;letter-spacing:.12em}
 .btn.active,.mini-btn.active,.toggle.active,.slot-btn.active,.rec-btn.active,.track-label.selected{
   border-color:#71f696;box-shadow:0 0 0 1px rgba(124,255,154,.34),0 0 14px rgba(73,216,110,.18),inset 0 1px 0 rgba(255,255,255,.05)
@@ -113,11 +113,11 @@ button{cursor:pointer}
   background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0)),linear-gradient(180deg,#0c110c,#070907);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.025),inset 0 -10px 16px rgba(0,0,0,.16)
 }
-.small-label,.fader-label{font-size:9px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;line-height:1.2}
+.small-label,.fader-label{font-size:8px;font-weight:900;letter-spacing:.15em;text-transform:uppercase;line-height:1.1}
 .small-label.left{text-align:left}
 .selectish,select,input[type=number]{
-  width:100%;min-height:38px;border-radius:11px;border:1px solid #2d4632;background:#030603;color:#f7fff7;
-  padding:0 8px;box-shadow:inset 0 0 10px rgba(0,0,0,.26);font-size:14px;font-weight:700;outline:none
+  width:100%;min-height:30px;border-radius:9px;border:1px solid #2d4632;background:#030603;color:#f7fff7;
+  padding:0 6px;box-shadow:inset 0 0 10px rgba(0,0,0,.26);font-size:12px;font-weight:700;outline:none
 }
 input[type=range]{appearance:none;-webkit-appearance:none;background:transparent;margin:0;min-width:0;width:100%}
 input[type=range]:not(.v-range)::-webkit-slider-runnable-track{
@@ -131,14 +131,14 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
 }
 
 .global-grid{
-  min-height:0;display:grid;grid-template-columns:104px 90px 56px 48px 48px 48px 176px;grid-template-rows:auto auto;
-  gap:8px;align-items:start
+  min-height:0;display:grid;grid-template-columns:58px 58px 36px 36px 36px 36px 92px;grid-template-rows:auto auto;
+  gap:4px;align-items:start;justify-content:space-between;overflow:hidden
 }
-.global-fields{padding:8px;display:grid;grid-template-rows:repeat(4,auto);gap:6px;align-content:start;grid-column:1 / span 2;grid-row:1}
-.global-field{display:grid;gap:3px}
-.fader-col{display:grid;gap:6px;align-content:start;justify-items:center}
+.global-fields{padding:6px;display:grid;grid-template-rows:repeat(4,auto);gap:4px;align-content:start;grid-column:1 / span 2;grid-row:1}
+.global-field{display:grid;gap:2px}
+.fader-col{display:grid;gap:4px;align-content:start;justify-items:center}
 .master-well,.track-well{
-  position:relative;width:38px;display:block;padding:6px 0;border-radius:14px;
+  position:relative;width:30px;display:block;padding:6px 0;border-radius:14px;
   background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0)),linear-gradient(180deg,#0a100a,#050705);
   border:1px solid #223422;box-shadow:inset 0 1px 0 rgba(255,255,255,.025),inset 0 -8px 12px rgba(0,0,0,.14);overflow:hidden
 }
@@ -150,19 +150,19 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
 .v-slider-groove{top:0;bottom:0;border:1px solid #314c37;background:linear-gradient(180deg,#162016,#090c09);box-shadow:inset 0 1px 3px rgba(0,0,0,.4)}
 .v-slider-fill{bottom:0;height:0;background:linear-gradient(180deg,rgba(148,255,174,.86),rgba(79,223,112,.34));box-shadow:0 0 10px rgba(73,216,110,.22)}
 .v-slider-knob{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:24px;height:24px;border-radius:50%;border:1px solid rgba(228,255,232,.55);background:radial-gradient(circle at 35% 35%,#f3fff4 0%,#94ffae 34%,#4fdf70 64%,#1e6a34 100%);box-shadow:0 0 0 1px rgba(124,255,154,.26),0 0 16px rgba(73,216,110,.28)}
-.global-actions-left,.global-actions-mid,.global-actions-right{display:grid;gap:8px;align-content:start}
-.global-actions-left,.global-actions-mid{grid-template-rows:repeat(4,38px)}
+.global-actions-left,.global-actions-mid,.global-actions-right{display:grid;gap:4px;align-content:start}
+.global-actions-left,.global-actions-mid{grid-template-rows:repeat(4,34px)}
 .global-actions-left{grid-column:1;grid-row:2}
 .global-actions-mid{grid-column:2;grid-row:2}
 .global-actions-right{
-  grid-column:7;grid-row:1 / span 2;grid-template-columns:repeat(2,84px);grid-template-rows:40px 44px 84px;gap:8px;align-items:start;justify-content:end
+  grid-column:7;grid-row:1 / span 2;grid-template-columns:44px 44px;grid-template-rows:34px 38px 92px;gap:4px;align-items:start;justify-content:end;justify-self:end
 }
 .global-actions-right .wide{grid-column:1 / span 2}
 .global-actions-right .wav-btn{
-  grid-column:1 / span 2;width:100%;min-height:44px;justify-self:stretch;padding:6px 6px;line-height:1.1;white-space:normal
+  grid-column:1 / span 2;width:92px;min-height:38px;justify-self:end;padding:4px 6px;line-height:1.05;white-space:normal
 }
 .global-actions-right .start-btn{
-  grid-column:1 / span 2;width:100%;min-height:84px;justify-self:stretch;padding:6px 6px;line-height:1.15;aspect-ratio:auto
+  grid-column:1 / span 2;width:92px;min-height:92px;justify-self:end;padding:4px 6px;line-height:1.1;aspect-ratio:1 / 1;white-space:normal
 }
 .track-panel .head{display:grid;grid-template-columns:auto minmax(118px,1fr) auto;gap:6px;align-items:center}
 .clear-track-btn{justify-self:center;min-width:116px}
@@ -189,11 +189,11 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
 .export-note{font-size:12px;line-height:1.45;color:var(--muted)}
 .export-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 @media (max-width: 940px){
-  .app{grid-template-rows:38px minmax(308px,38.5dvh) minmax(408px,40dvh) minmax(114px,11.5dvh)}
+  .app{grid-template-rows:38px minmax(330px,40.4dvh) minmax(384px,37.8dvh) minmax(104px,10dvh)}
   .step-header,.track-row{grid-template-columns:72px repeat(16,minmax(0,1fr))}
   .tracks{grid-auto-rows:23px}
   .step-btn,.track-label{height:23px;min-height:23px}
-  .global-grid{grid-template-columns:98px 84px 54px 46px 46px 46px 170px}
+  .global-grid{grid-template-columns:56px 56px 34px 34px 34px 34px 88px;gap:4px}
   .master-well{height:158px}
   .track-well{height:142px}
 }
@@ -352,7 +352,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     { code:'A', name:'BD',  type:'bd'  },
   ];
   const TOTAL_STEPS = 32;
-  const STORE = 'schlagherz-pwa-v10-state';
+  const STORE = 'schlagherz-pwa-v11-state';
   const SR = 44100;
 
   const defaults = {
