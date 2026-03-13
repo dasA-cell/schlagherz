@@ -1,7 +1,7 @@
-const CACHE='schlagherz-pwa-v19-cache';
+const CACHE='schlagherz-pwa-v20-cache';
 const APP_SHELL=[
   './',
-  './index.html?v=19',
+  './index.html?v=20',
   './manifest.webmanifest?v=11',
   './icon-192.svg?v=11',
   './icon-512.svg?v=11'
@@ -15,6 +15,6 @@ self.addEventListener('fetch',e=>{
       const copy=r.clone();
       caches.open(CACHE).then(c=>c.put(e.request,copy));
       return r;
-    }).catch(()=>caches.match('./index.html?v=19')))
+    }).catch(()=>caches.match('./index.html?v=20')))
   );
 });
