@@ -1,32 +1,45 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#6e5123"/>
-      <stop offset="1" stop-color="#24170d"/>
+      <stop offset="0" stop-color="#111711"/>
+      <stop offset="1" stop-color="#040604"/>
     </linearGradient>
-    <radialGradient id="lamp" cx="50%" cy="40%" r="55%">
-      <stop offset="0" stop-color="#ffe8b6"/>
-      <stop offset="0.45" stop-color="#ffb347"/>
-      <stop offset="1" stop-color="#8d4e17"/>
-    </radialGradient>
+    <linearGradient id="glow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#eaffee"/>
+      <stop offset="0.35" stop-color="#97ffb0"/>
+      <stop offset="0.75" stop-color="#49d86e"/>
+      <stop offset="1" stop-color="#163a20"/>
+    </linearGradient>
   </defs>
-  <rect x="8" y="8" width="176" height="176" rx="28" fill="url(#bg)" stroke="#d3ae62" stroke-width="6"/>
-  <rect x="28" y="28" width="136" height="36" rx="8" fill="#1a120c" stroke="#b48a46"/>
-  <g fill="url(#lamp)">
-    <rect x="28" y="84" width="18" height="18" rx="4"/>
-    <rect x="52" y="84" width="18" height="18" rx="4"/>
-    <rect x="76" y="84" width="18" height="18" rx="4"/>
-    <rect x="100" y="84" width="18" height="18" rx="4"/>
-    <rect x="124" y="84" width="18" height="18" rx="4"/>
-    <rect x="148" y="84" width="18" height="18" rx="4"/>
-    <rect x="28" y="108" width="18" height="18" rx="4"/>
-    <rect x="52" y="108" width="18" height="18" rx="4"/>
-    <rect x="76" y="108" width="18" height="18" rx="4"/>
-    <rect x="100" y="108" width="18" height="18" rx="4"/>
-    <rect x="124" y="108" width="18" height="18" rx="4"/>
-    <rect x="148" y="108" width="18" height="18" rx="4"/>
+  <rect x="8" y="8" width="176" height="176" rx="30" fill="url(#bg)" stroke="#476d4e" stroke-width="6"/>
+  <rect x="24" y="24" width="144" height="34" rx="10" fill="#070a07" stroke="#29412d"/>
+  <g fill="#b8c6b8" opacity="0.85" font-family="Arial, sans-serif" font-size="14" font-weight="700">
+    <text x="96" y="46" text-anchor="middle" letter-spacing="3">SCHLAGHERZ</text>
   </g>
-  <circle cx="50" cy="150" r="14" fill="#c89a50" stroke="#e4c078"/>
-  <circle cx="96" cy="150" r="14" fill="#c89a50" stroke="#e4c078"/>
-  <circle cx="142" cy="150" r="14" fill="#c89a50" stroke="#e4c078"/>
+  <g>
+    <rect x="26" y="74" width="18" height="18" rx="4" fill="#0b100b" stroke="#29412d"/>
+    <rect x="48" y="74" width="18" height="18" rx="4" fill="url(#glow)"/>
+    <rect x="70" y="74" width="18" height="18" rx="4" fill="#0b100b" stroke="#29412d"/>
+    <rect x="92" y="74" width="18" height="18" rx="4" fill="url(#glow)"/>
+    <rect x="114" y="74" width="18" height="18" rx="4" fill="#0b100b" stroke="#29412d"/>
+    <rect x="136" y="74" width="18" height="18" rx="4" fill="url(#glow)"/>
+
+    <rect x="26" y="96" width="18" height="18" rx="4" fill="url(#glow)"/>
+    <rect x="48" y="96" width="18" height="18" rx="4" fill="#0b100b" stroke="#29412d"/>
+    <rect x="70" y="96" width="18" height="18" rx="4" fill="url(#glow)"/>
+    <rect x="92" y="96" width="18" height="18" rx="4" fill="#0b100b" stroke="#29412d"/>
+    <rect x="114" y="96" width="18" height="18" rx="4" fill="url(#glow)"/>
+    <rect x="136" y="96" width="18" height="18" rx="4" fill="#0b100b" stroke="#29412d"/>
+  </g>
+  <g>
+    <rect x="34" y="130" width="20" height="34" rx="10" fill="#0a100a" stroke="#29412d"/>
+    <rect x="86" y="122" width="20" height="42" rx="10" fill="#0a100a" stroke="#29412d"/>
+    <rect x="138" y="114" width="20" height="50" rx="10" fill="#0a100a" stroke="#29412d"/>
+    <rect x="39" y="136" width="10" height="22" rx="5" fill="url(#glow)"/>
+    <circle cx="44" cy="144" r="8" fill="url(#glow)"/>
+    <rect x="91" y="128" width="10" height="30" rx="5" fill="url(#glow)"/>
+    <circle cx="96" cy="136" r="8" fill="url(#glow)"/>
+    <rect x="143" y="120" width="10" height="38" rx="5" fill="url(#glow)"/>
+    <circle cx="148" cy="128" r="8" fill="url(#glow)"/>
+  </g>
 </svg>
