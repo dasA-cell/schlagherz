@@ -703,6 +703,9 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
   }
   function drum(ctx, chain, type, time, t){
     const a = Math.max(.0005, t.a || .001), d = Math.max(.005, t.d || .12), r = Math.max(.005, t.r || .05), rr = ratio(t.tune), o = out(ctx, chain, t);
+    const softA = Math.max(.0005, a);
+    const burstA = Math.max(.0004, softA * .98);
+    const metalA = Math.max(.0004, softA * .92);
     const tone = (kind, f1, f2, peak, len, off = 0, q = 0) => {
       const osc = ctx.createOscillator(), g = ctx.createGain();
       osc.type = kind;
@@ -713,20 +716,20 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
         filter.type = 'bandpass';
         filter.frequency.value = Math.max(80, (f1 + (f2 || f1)) * 0.5);
         filter.Q.value = q;
-        env(g, time + off, peak, a, len * .42 + d * .14, len * .18 + r * .18);
+        env(g, time + off, peak, softA, len * .42 + d * .14, len * .18 + r * .18);
         osc.connect(filter).connect(g).connect(o);
       } else {
-        env(g, time + off, peak, a, len * .42 + d * .14, len * .18 + r * .18);
+        env(g, time + off, peak, softA, len * .42 + d * .14, len * .18 + r * .18);
         osc.connect(g).connect(o);
       }
       osc.start(time + off);
       osc.stop(time + off + len + .14);
     };
-    const burst = (dur, ft, freq, q, peak, off = 0, postFilter = null) => {
+    const burst = (dur, ft, freq, q, peak, off = 0, postFilter = null, atk = .0004) => {
       const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
       s.buffer = noise(ctx, dur + .04);
       f.type = ft; f.frequency.value = Math.max(40, freq); if(q) f.Q.value = q;
-      env(g, time + off, peak, .0004, dur * .42, dur * .28);
+      env(g, time + off, peak, Math.max(.0004, atk), dur * .42, dur * .28);
       if(postFilter){
         const p = ctx.createBiquadFilter();
         p.type = postFilter.type; p.frequency.value = postFilter.freq; if(postFilter.q) p.Q.value = postFilter.q;
@@ -737,19 +740,19 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       s.start(time + off);
       s.stop(time + off + dur + .06);
     };
-    const hatNoise = (dur, peak, off = 0, bright = 1) => {
-      burst(dur, 'highpass', 7600 * rr, .15, peak, off);
-      burst(dur * .82, 'bandpass', 9800 * rr, .6, peak * .65 * bright, off + .001);
-      burst(dur * .58, 'bandpass', 12600 * rr, .8, peak * .34 * bright, off + .002);
+    const hatNoise = (dur, peak, off = 0, bright = 1, atk = burstA) => {
+      burst(dur, 'highpass', 7600 * rr, .15, peak, off, null, atk);
+      burst(dur * .82, 'bandpass', 9800 * rr, .6, peak * .65 * bright, off + .001, null, atk);
+      burst(dur * .58, 'bandpass', 12600 * rr, .8, peak * .34 * bright, off + .002, null, atk);
     };
-    const metallic = (freqs, peak, len, off = 0) => {
+    const metallic = (freqs, peak, len, off = 0, atk = metalA) => {
       freqs.forEach((freq, i) => {
         const osc = ctx.createOscillator(), g = ctx.createGain();
         osc.type = i % 2 ? 'square' : 'triangle';
         osc.frequency.setValueAtTime(freq * rr, time + off);
         g.gain.setValueAtTime(0.0001, time + off);
-        g.gain.linearRampToValueAtTime(Math.max(.001, peak * (0.92 - i * .1)), time + off + .001);
-        g.gain.exponentialRampToValueAtTime(0.0001, time + off + len * (0.8 + i * .05));
+        g.gain.linearRampToValueAtTime(Math.max(.001, peak * (0.92 - i * .1)), time + off + Math.max(.0005, atk));
+        g.gain.exponentialRampToValueAtTime(0.0001, time + off + Math.max(.004, atk + len * (0.8 + i * .05)));
         osc.connect(g).connect(o);
         osc.start(time + off);
         osc.stop(time + off + len + .05);
@@ -763,10 +766,11 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     }
     if(type === 'sd'){
       const len = .16 + d * .08 + r * .04;
-      burst(len, 'highpass', 1600 * rr, .45, .68, 0, {type:'bandpass', freq:2450 * rr, q:1.05});
-      burst(len * .72, 'bandpass', 1880 * rr, 1.15, .34, .003);
-      tone('triangle', 318 * rr, 206 * rr, .16, .08 + d * .04);
-      tone('sine', 188 * rr, 158 * rr, .09, .06 + d * .03, .001);
+      const toneTrim = 1 - Math.min(.45, softA * 2.4);
+      burst(len, 'highpass', 1600 * rr, .45, .68, 0, {type:'bandpass', freq:2450 * rr, q:1.05}, burstA);
+      burst(len * .72, 'bandpass', 1880 * rr, 1.15, .34, .003, null, burstA);
+      tone('triangle', 318 * rr, 206 * rr, .16 * toneTrim, .08 + d * .04);
+      tone('sine', 188 * rr, 158 * rr, .09 * toneTrim, .06 + d * .03, .001);
       return;
     }
     if(type === 'rim'){
@@ -778,23 +782,23 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     }
     if(type === 'clp'){
       const body = .040 + d * .06 + r * .08;
-      burst(body, 'bandpass', 1650 * rr, 1.0, .56, 0.000);
-      burst(body * .92, 'bandpass', 2150 * rr, 1.15, .44, .010);
-      burst(body * .84, 'bandpass', 2850 * rr, 1.3, .34, .021);
-      burst(body * 1.35, 'highpass', 2200 * rr, .45, .18, .006);
+      burst(body, 'bandpass', 1650 * rr, 1.0, .56, 0.000, null, burstA);
+      burst(body * .92, 'bandpass', 2150 * rr, 1.15, .44, .010, null, burstA);
+      burst(body * .84, 'bandpass', 2850 * rr, 1.3, .34, .021, null, burstA);
+      burst(body * 1.35, 'highpass', 2200 * rr, .45, .18, .006, null, burstA);
       return;
     }
     if(type === 'chh'){
       const len = .055 + d * .05 + r * .03;
-      hatNoise(len, .22, 0, 1.15);
-      metallic([3220, 4840, 6450, 8160, 9710], .020, len * .85);
+      hatNoise(len, .22, 0, 1.15, burstA);
+      metallic([3220, 4840, 6450, 8160, 9710], .020, len * .85, 0, metalA);
       return;
     }
     if(type === 'ohh'){
       const len = .20 + d * .20 + r * .26;
-      hatNoise(len, .25, 0, 1.2);
-      burst(len * .86, 'highpass', 6800 * rr, .12, .12, .004);
-      metallic([2980, 4520, 6060, 7480, 9100], .018, len * .95, .002);
+      hatNoise(len, .25, 0, 1.2, burstA);
+      burst(len * .86, 'highpass', 6800 * rr, .12, .12, .004, null, burstA);
+      metallic([2980, 4520, 6060, 7480, 9100], .018, len * .95, .002, metalA);
       return;
     }
     if(type === 'cow'){
@@ -836,7 +840,25 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       const o = out(audioCtx, chain, t);
       if(buf){
         const s = audioCtx.createBufferSource();
-        s.buffer = buf; s.playbackRate.value = ratio(t.tune); s.connect(o); s.start(when);
+        const g = audioCtx.createGain();
+        const rate = ratio(t.tune);
+        const dur = Math.max(.03, buf.duration / Math.max(.125, rate));
+        const att = Math.max(.0005, t.a || .001);
+        const dec = Math.max(.005, t.d || .12);
+        const rel = Math.max(.005, t.r || .05);
+        const peakAt = when + Math.min(att, Math.max(.004, dur * .35));
+        const decayEnd = when + Math.min(dur * .72, Math.max(att + dec, att + .005));
+        const releaseStart = when + Math.max(Math.min(dur - .004, dur - rel), (decayEnd - when));
+        s.buffer = buf;
+        s.playbackRate.value = rate;
+        g.gain.setValueAtTime(0.0001, when);
+        g.gain.linearRampToValueAtTime(1, peakAt);
+        g.gain.exponentialRampToValueAtTime(.72, decayEnd);
+        g.gain.setValueAtTime(.72, releaseStart);
+        g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+        s.connect(g).connect(o);
+        s.start(when);
+        s.stop(when + dur + .01);
       } else {
         drum(audioCtx, chain, 'pc1', when, {...t, vol:t.vol * .55, tune:0});
       }
