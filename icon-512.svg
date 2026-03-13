@@ -1,32 +1,45 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#6e5123"/>
-      <stop offset="1" stop-color="#24170d"/>
+      <stop offset="0" stop-color="#111711"/>
+      <stop offset="1" stop-color="#040604"/>
     </linearGradient>
-    <radialGradient id="lamp" cx="50%" cy="40%" r="55%">
-      <stop offset="0" stop-color="#ffe8b6"/>
-      <stop offset="0.45" stop-color="#ffb347"/>
-      <stop offset="1" stop-color="#8d4e17"/>
-    </radialGradient>
+    <linearGradient id="glow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#eaffee"/>
+      <stop offset="0.35" stop-color="#97ffb0"/>
+      <stop offset="0.75" stop-color="#49d86e"/>
+      <stop offset="1" stop-color="#163a20"/>
+    </linearGradient>
   </defs>
-  <rect x="22" y="22" width="468" height="468" rx="74" fill="url(#bg)" stroke="#d3ae62" stroke-width="14"/>
-  <rect x="72" y="72" width="368" height="94" rx="18" fill="#1a120c" stroke="#b48a46" stroke-width="4"/>
-  <g fill="url(#lamp)">
-    <rect x="72" y="210" width="48" height="48" rx="10"/>
-    <rect x="136" y="210" width="48" height="48" rx="10"/>
-    <rect x="200" y="210" width="48" height="48" rx="10"/>
-    <rect x="264" y="210" width="48" height="48" rx="10"/>
-    <rect x="328" y="210" width="48" height="48" rx="10"/>
-    <rect x="392" y="210" width="48" height="48" rx="10"/>
-    <rect x="72" y="274" width="48" height="48" rx="10"/>
-    <rect x="136" y="274" width="48" height="48" rx="10"/>
-    <rect x="200" y="274" width="48" height="48" rx="10"/>
-    <rect x="264" y="274" width="48" height="48" rx="10"/>
-    <rect x="328" y="274" width="48" height="48" rx="10"/>
-    <rect x="392" y="274" width="48" height="48" rx="10"/>
+  <rect x="22" y="22" width="468" height="468" rx="78" fill="url(#bg)" stroke="#476d4e" stroke-width="14"/>
+  <rect x="66" y="66" width="380" height="84" rx="22" fill="#070a07" stroke="#29412d" stroke-width="4"/>
+  <g fill="#b8c6b8" opacity="0.92" font-family="Arial, sans-serif" font-size="36" font-weight="700">
+    <text x="256" y="118" text-anchor="middle" letter-spacing="8">SCHLAGHERZ</text>
   </g>
-  <circle cx="136" cy="398" r="34" fill="#c89a50" stroke="#e4c078" stroke-width="6"/>
-  <circle cx="256" cy="398" r="34" fill="#c89a50" stroke="#e4c078" stroke-width="6"/>
-  <circle cx="376" cy="398" r="34" fill="#c89a50" stroke="#e4c078" stroke-width="6"/>
+  <g>
+    <rect x="74" y="188" width="48" height="48" rx="10" fill="#0b100b" stroke="#29412d"/>
+    <rect x="132" y="188" width="48" height="48" rx="10" fill="url(#glow)"/>
+    <rect x="190" y="188" width="48" height="48" rx="10" fill="#0b100b" stroke="#29412d"/>
+    <rect x="248" y="188" width="48" height="48" rx="10" fill="url(#glow)"/>
+    <rect x="306" y="188" width="48" height="48" rx="10" fill="#0b100b" stroke="#29412d"/>
+    <rect x="364" y="188" width="48" height="48" rx="10" fill="url(#glow)"/>
+
+    <rect x="74" y="246" width="48" height="48" rx="10" fill="url(#glow)"/>
+    <rect x="132" y="246" width="48" height="48" rx="10" fill="#0b100b" stroke="#29412d"/>
+    <rect x="190" y="246" width="48" height="48" rx="10" fill="url(#glow)"/>
+    <rect x="248" y="246" width="48" height="48" rx="10" fill="#0b100b" stroke="#29412d"/>
+    <rect x="306" y="246" width="48" height="48" rx="10" fill="url(#glow)"/>
+    <rect x="364" y="246" width="48" height="48" rx="10" fill="#0b100b" stroke="#29412d"/>
+  </g>
+  <g>
+    <rect x="96" y="336" width="52" height="98" rx="22" fill="#0a100a" stroke="#29412d"/>
+    <rect x="230" y="314" width="52" height="120" rx="22" fill="#0a100a" stroke="#29412d"/>
+    <rect x="364" y="292" width="52" height="142" rx="22" fill="#0a100a" stroke="#29412d"/>
+    <rect x="109" y="350" width="26" height="70" rx="13" fill="url(#glow)"/>
+    <circle cx="122" cy="374" r="20" fill="url(#glow)"/>
+    <rect x="243" y="328" width="26" height="92" rx="13" fill="url(#glow)"/>
+    <circle cx="256" cy="352" r="20" fill="url(#glow)"/>
+    <rect x="377" y="306" width="26" height="114" rx="13" fill="url(#glow)"/>
+    <circle cx="390" cy="330" r="20" fill="url(#glow)"/>
+  </g>
 </svg>
