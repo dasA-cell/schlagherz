@@ -400,6 +400,8 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     sampleMonitorGain: null,
     manualRecordCursor: 0,
     liveRec: false,
+    transportStartTime: 0,
+    pendingLiveSkip: null,
     tracks: TRACKS.map(t => ({
       ...t,
       steps: Array.from({length: TOTAL_STEPS}, () => t.type === 'smp' ? 0 : false),
@@ -514,8 +516,11 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
   }
   function restoreSnapshot(snap){
     const wasPlaying = state.playing;
-    const carryStep = state.playhead % Math.max(1, snap.patternLength ?? state.patternLength ?? 16);
-    if(state.timer){ clearInterval(state.timer); state.timer = null; }
+    const keepPlayhead = state.playhead;
+    const keepLastStep = state.lastScheduledStep;
+    const keepNextNoteTime = state.nextNoteTime;
+    const keepTransportStartTime = state.transportStartTime;
+    if(!wasPlaying && state.timer){ clearInterval(state.timer); state.timer = null; }
     Object.assign(state, {
       patternLength: snap.patternLength ?? 16,
       page: snap.page ?? 0,
@@ -536,19 +541,25 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       clampTrackState(state.tracks[i]);
     });
     if(audioCtx) hydrate();
-    state.playhead = carryStep % state.patternLength;
-    state.lastScheduledStep = (state.playhead - 1 + state.patternLength) % state.patternLength;
-    renderAll();
     if(wasPlaying && audioCtx){
       state.playing = true;
-      state.nextNoteTime = audioCtx.currentTime + .035;
-      state.timer = setInterval(tick, 25);
+      state.playhead = ((keepPlayhead % state.patternLength) + state.patternLength) % state.patternLength;
+      state.lastScheduledStep = ((keepLastStep % state.patternLength) + state.patternLength) % state.patternLength;
+      state.nextNoteTime = Math.max(audioCtx.currentTime + .01, keepNextNoteTime || (audioCtx.currentTime + .05));
+      state.transportStartTime = keepTransportStartTime || (state.nextNoteTime - (state.playhead * (60 / state.bpm / 4)));
+      if(state.patternLength === 32) state.page = state.lastScheduledStep >= 16 ? 1 : 0;
+      if(!state.timer) state.timer = setInterval(tick, 25);
       $('transportDisplay').textContent = 'RUN';
     } else {
       state.playing = false;
+      state.playhead = 0;
+      state.lastScheduledStep = state.patternLength - 1;
+      state.nextNoteTime = 0;
+      state.transportStartTime = 0;
       $('transportDisplay').textContent = 'STOP';
       stepEls.flat().forEach(b => b.classList.remove('playing'));
     }
+    renderAll();
   }
   function undo(){
     const snap = state.undoStack.pop();
@@ -876,21 +887,66 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     const idx = trackStepIndex(track, absStep);
     track.lastTriggeredSlot = track.steps[idx] || track.sampleSlot;
   }
-  function metronome(time){
+  function syncPageToStep(step){
+    if(state.patternLength !== 32) return;
+    const desired = ((step % state.patternLength) + state.patternLength) % state.patternLength >= 16 ? 1 : 0;
+    if(desired !== state.page){
+      state.page = desired;
+      renderAll();
+    }
+  }
+  function rememberLiveSkip(trackIndex, step, when){
+    state.pendingLiveSkip = {
+      trackIndex,
+      step,
+      until: when + Math.max(.18, (60 / state.bpm / 4) * 1.25)
+    };
+  }
+  function consumeLiveSkip(trackIndex, step, when){
+    const hit = state.pendingLiveSkip;
+    if(!hit) return false;
+    if(when > hit.until){ state.pendingLiveSkip = null; return false; }
+    if(hit.trackIndex === trackIndex && hit.step === step){
+      state.pendingLiveSkip = null;
+      return true;
+    }
+    return false;
+  }
+  function currentTransportStep(len, quantized = true){
+    if(!audioCtx || !state.playing) return 0;
+    const stepDur = 60 / state.bpm / 4;
+    const elapsed = Math.max(0, audioCtx.currentTime - state.transportStartTime);
+    const raw = elapsed / stepDur;
+    const step = quantized ? Math.round(raw) : Math.floor(raw);
+    return ((step % len) + len) % len;
+  }
+  function metronome(step, time){
     if(!state.met) return;
+    const [numRaw, denRaw] = String(state.beat || '4/4').split('/');
+    const numerator = Math.max(1, parseInt(numRaw, 10) || 4);
+    const denominator = Math.max(1, parseInt(denRaw, 10) || 4);
+    const stepsPerBeat = denominator === 8 ? 2 : denominator === 16 ? 1 : 4;
+    const stepsPerBar = Math.max(1, numerator * stepsPerBeat);
+    if(step % stepsPerBeat !== 0) return;
+    const accent = step % stepsPerBar === 0;
     const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-    o.type = 'square'; o.frequency.value = (state.lastScheduledStep % 4 === 0) ? 1500 : 1100;
-    o.connect(g); g.connect(dryGain); env(g, time, .14, .001, .02, .02); o.start(time); o.stop(time + .05);
+    o.type = accent ? 'square' : 'triangle';
+    o.frequency.value = accent ? 1600 : 1180;
+    o.connect(g); g.connect(dryGain);
+    env(g, time, accent ? .18 : .11, .001, accent ? .026 : .018, accent ? .028 : .02);
+    o.start(time); o.stop(time + (accent ? .07 : .05));
   }
   function scheduleStep(step, time){
     state.lastScheduledStep = step;
+    syncPageToStep(step);
     state.tracks.forEach((t, i) => {
       if(stepOn(t, step)){
         prepTrack(t, step);
+        if(consumeLiveSkip(i, step, time)) return;
         trigger(i, time);
       }
     });
-    metronome(time);
+    metronome(step, time);
   }
   function paintPlayhead(){
     stepEls.flat().forEach(b => b.classList.remove('playing'));
@@ -916,13 +972,24 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     if(audioCtx.state === 'suspended') audioCtx.resume();
     if(state.playing) return;
     state.playing = true;
-    state.nextNoteTime = audioCtx.currentTime + .05;
+    state.playhead = 0;
+    state.lastScheduledStep = state.patternLength - 1;
+    state.pendingLiveSkip = null;
+    state.transportStartTime = audioCtx.currentTime + .05;
+    state.nextNoteTime = state.transportStartTime;
+    if(state.patternLength === 32 && state.page !== 0){ state.page = 0; renderAll(); }
     state.timer = setInterval(tick, 25);
     $('transportDisplay').textContent = 'RUN';
   }
   function stop(){
     state.playing = false;
     if(state.timer){ clearInterval(state.timer); state.timer = null; }
+    state.playhead = 0;
+    state.lastScheduledStep = state.patternLength - 1;
+    state.nextNoteTime = 0;
+    state.transportStartTime = 0;
+    state.pendingLiveSkip = null;
+    if(state.patternLength === 32 && state.page !== 0){ state.page = 0; renderAll(); }
     $('transportDisplay').textContent = 'STOP';
     stepEls.flat().forEach(b => b.classList.remove('playing'));
   }
@@ -1111,11 +1178,12 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
   function liveWrite(ti){
     const t = state.tracks[ti], len = getTrackLen(t);
     let step;
-    if(state.playing) step = state.playhead % len;
+    if(state.playing) step = currentTransportStep(len, t.quant !== false);
     else { step = state.manualRecordCursor % len; state.manualRecordCursor = (state.manualRecordCursor + 1) % len; }
     if(t.type === 'smp') t.steps[step] = state.tracks[0].sampleSlot;
     else t.steps[step] = true;
     drawTracks(); save();
+    return step;
   }
 
   function closeExport(){
@@ -1337,7 +1405,12 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     $('triggerBtn').addEventListener('pointerdown', e => {
       e.preventDefault(); ensureAudio();
       if(state.currentTrack === 0) state.tracks[0].lastTriggeredSlot = state.tracks[0].sampleSlot;
-      trigger(state.currentTrack); if(state.liveRec) liveWrite(state.currentTrack);
+      const now = audioCtx.currentTime;
+      trigger(state.currentTrack, now);
+      if(state.liveRec){
+        const writtenStep = liveWrite(state.currentTrack);
+        if(state.playing) rememberLiveSkip(state.currentTrack, writtenStep, now);
+      }
     });
     $('resetPerfBtn').addEventListener('pointerdown', e => { e.preventDefault(); resetTrack(); });
     $('startTrkBtn').addEventListener('pointerdown', e => {
@@ -1360,7 +1433,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
 
   async function sw(){
     if('serviceWorker' in navigator){
-      try{ await navigator.serviceWorker.register('./service-worker.js?v=10'); }catch(err){ console.warn(err); }
+      try{ await navigator.serviceWorker.register('./service-worker.js?v=13'); }catch(err){ console.warn(err); }
     }
   }
 
