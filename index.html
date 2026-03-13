@@ -860,40 +860,34 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       if(source !== 'manual-selected' && when < (state.sampleTriggerBlockUntil || 0)) return;
       const slot = Math.max(0, ((t.lastTriggeredSlot || t.sampleSlot) - 1));
       const buf = t.sampleBuffers[slot];
+      if(!buf || !buf.getChannelData) return;
       const o = out(audioCtx, chain, t);
-      if(buf){
-        const s = audioCtx.createBufferSource();
-        const g = audioCtx.createGain();
-        const rate = ratio(t.tune);
-        const baseDur = Math.max(.03, buf.duration / Math.max(.125, rate));
-        const aNorm = clamp((+t.a || 0) / .2, 0, 1);
-        const dNorm = clamp(((+t.d || .18) - .02) / 1.38, 0, 1);
-        const rNorm = clamp(((+t.r || .09) - .02) / 1.38, 0, 1);
-        const att = Math.max(.001, Math.min(.18, .002 + aNorm * Math.min(.18, baseDur * .55)));
-        const playFrac = clamp(.18 + dNorm * .42 + rNorm * .40, .08, 1);
-        const effDur = Math.max(.02, Math.min(baseDur, baseDur * playFrac));
-        const rel = Math.max(.008, Math.min(.35, .01 + rNorm * Math.min(.35, effDur * .75)));
-        const peak = 1;
-        const sustain = .72;
-        const attackEnd = when + Math.min(att, Math.max(.004, effDur * .55));
-        const decayWindow = Math.max(.008, effDur * (.05 + dNorm * .45));
-        const decayEnd = Math.min(when + effDur - .004, attackEnd + decayWindow);
-        const releaseStart = Math.max(decayEnd, when + effDur - rel);
-        const endTime = when + effDur;
-        s.buffer = buf;
-        s.playbackRate.value = rate;
-        g.gain.cancelScheduledValues(when);
-        g.gain.setValueAtTime(0.0001, when);
-        g.gain.linearRampToValueAtTime(peak, attackEnd);
-        g.gain.linearRampToValueAtTime(sustain, decayEnd);
-        g.gain.setValueAtTime(sustain, releaseStart);
-        g.gain.exponentialRampToValueAtTime(0.0001, endTime);
-        s.connect(g).connect(o);
-        s.start(when, 0, effDur);
-        s.stop(endTime + .01);
-      } else {
-        drum(audioCtx, chain, 'pc1', when, {...t, vol:t.vol * .55, tune:0});
-      }
+      const s = audioCtx.createBufferSource();
+      const g = audioCtx.createGain();
+      const rate = ratio(t.tune);
+      const baseDur = Math.max(.03, buf.duration / Math.max(.125, rate));
+      const aNorm = clamp((+t.a || 0) / .2, 0, 1);
+      const dNorm = clamp(((+t.d || .02) - .02) / 1.38, 0, 1);
+      const rNorm = clamp(((+t.r || .02) - .02) / 1.38, 0, 1);
+      const att = Math.max(.001, Math.min(.22, .001 + aNorm * Math.min(.22, baseDur * .55)));
+      const sustain = .72;
+      const attackEnd = when + Math.min(att, Math.max(.004, baseDur * .45));
+      const decayWindow = Math.max(.008, .012 + dNorm * Math.min(.55, baseDur * .42));
+      const decayEnd = Math.min(when + baseDur - .006, attackEnd + decayWindow);
+      const rel = Math.max(.01, .01 + rNorm * Math.min(.6, baseDur * .55));
+      const releaseStart = Math.max(decayEnd, when + Math.max(.012, baseDur - rel));
+      const endTime = Math.max(releaseStart + .008, when + baseDur);
+      s.buffer = buf;
+      s.playbackRate.value = rate;
+      g.gain.cancelScheduledValues(when);
+      g.gain.setValueAtTime(0.0001, when);
+      g.gain.linearRampToValueAtTime(1, attackEnd);
+      g.gain.linearRampToValueAtTime(sustain, decayEnd);
+      g.gain.setValueAtTime(sustain, releaseStart);
+      g.gain.exponentialRampToValueAtTime(0.0001, endTime);
+      s.connect(g).connect(o);
+      s.start(when);
+      s.stop(endTime + .01);
       return;
     }
     drum(audioCtx, chain, t.type, when, t);
@@ -1160,10 +1154,8 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     const oh = state.tracks.find(t => t.type === 'ohh');
     const cow = state.tracks.find(t => t.type === 'cow');
     for(let i = 0; i < len; i++){
-      bd.steps[i] = (i % 4 === 0);
-      ch.steps[i] = (i % 2 === 0);
-      if(oh) oh.steps[i] = false;
-      if(cow) cow.steps[i] = false;
+      if(i % 4 === 0) bd.steps[i] = true;
+      if(i % 2 === 0) ch.steps[i] = true;
     }
     [4, 12].forEach(i => { if(i < len) sd.steps[i] = true; });
     if(len > 8 && oh) oh.steps[7] = true;
@@ -1193,10 +1185,25 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
   }
   function resetTrack(){
     snapshot();
-    const t = state.tracks[state.currentTrack], keep = {sampleSlot:t.sampleSlot, sampleBuffers:t.sampleBuffers, lastTriggeredSlot:t.lastTriggeredSlot, steps:t.steps};
-    Object.assign(t, deep(defaults[t.type]));
-    t.sampleSlot = keep.sampleSlot || 1; t.sampleBuffers = keep.sampleBuffers || [null, null, null, null]; t.lastTriggeredSlot = keep.lastTriggeredSlot || t.sampleSlot; t.steps = keep.steps;
-    clampTrackState(t); syncUi(); drawTracks(); drawSlots(); save(); $('trackStatus').textContent = `TRK ${t.code}: ${t.name} wurde auf seine Parameter-Grundstellung zurückgesetzt.`;
+    const t = state.tracks[state.currentTrack];
+    const keep = {
+      sampleSlot: t.sampleSlot,
+      sampleBuffers: Array.isArray(t.sampleBuffers) ? [...t.sampleBuffers] : [null, null, null, null],
+      lastTriggeredSlot: t.lastTriggeredSlot,
+      steps: Array.isArray(t.steps) ? [...t.steps] : Array.from({length: TOTAL_STEPS}, () => t.type === 'smp' ? 0 : false)
+    };
+    const fresh = deep(defaults[t.type]);
+    Object.assign(t, fresh);
+    t.sampleSlot = keep.sampleSlot || 1;
+    t.sampleBuffers = keep.sampleBuffers;
+    t.lastTriggeredSlot = keep.lastTriggeredSlot || t.sampleSlot;
+    t.steps = keep.steps;
+    clampTrackState(t);
+    syncUi();
+    drawTracks();
+    drawSlots();
+    save();
+    $('trackStatus').textContent = `TRK ${t.code}: ${t.name} wurde auf seine Parameter-Grundstellung zurückgesetzt.`;
   }
   function resetAll(){
     localStorage.removeItem(STORE); stop(); location.reload();
@@ -1340,11 +1347,17 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     const fade = Math.min(len, Math.floor(audioCtx.sampleRate * .02));
     const b = audioCtx.createBuffer(1, len, audioCtx.sampleRate), ch = b.getChannelData(0);
     for(let i = 0; i < len; i++){
-      let x = mono[i] || 0; if(i < fade) x *= i / fade; if(i > len - fade) x *= (len - i) / fade; ch[i] = x;
+      let x = mono[i] || 0;
+      if(i < fade) x *= i / Math.max(1, fade);
+      if(i > len - fade) x *= (len - i) / Math.max(1, fade);
+      ch[i] = x;
     }
     const smp = state.tracks[0];
     smp.sampleBuffers[smp.sampleSlot - 1] = b;
-    state.sampleChunks = []; drawSlots(); save();
+    smp.lastTriggeredSlot = smp.sampleSlot;
+    state.sampleChunks = [];
+    drawSlots();
+    save();
     disarmRec(`Sample in Slot ${smp.sampleSlot} gespeichert. Mikrofon wieder deaktiviert.`);
   }
 
@@ -1500,7 +1513,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
 
   async function sw(){
     if('serviceWorker' in navigator){
-      try{ await navigator.serviceWorker.register('./service-worker.js?v=16'); }catch(err){ console.warn(err); }
+      try{ await navigator.serviceWorker.register('./service-worker.js?v=18'); }catch(err){ console.warn(err); }
     }
   }
 
