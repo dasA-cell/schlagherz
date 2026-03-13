@@ -1,4 +1,4 @@
-const CACHE='schlagherz-pwa-v14-cache';
+const CACHE='schlagherz-pwa-v15-cache';
 const APP_SHELL=[
   './',
   './index.html?v=14',
