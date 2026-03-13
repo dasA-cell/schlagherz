@@ -356,16 +356,16 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
   const SR = 44100;
 
   const defaults = {
-    smp:{vol:.80,pan:0,tune:0,a:.001,d:.18,r:.09,rvbInt:0,dlyInt:0,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true},
-    cow:{vol:.70,pan:.08,tune:0,a:.001,d:.18,r:.08,rvbInt:.04,dlyInt:0,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true},
-    pc2:{vol:.72,pan:.10,tune:0,a:.001,d:.22,r:.12,rvbInt:.05,dlyInt:.01,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true},
-    pc1:{vol:.76,pan:-.10,tune:0,a:.001,d:.26,r:.12,rvbInt:.05,dlyInt:.01,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true},
-    ohh:{vol:.60,pan:.12,tune:0,a:.001,d:.28,r:.22,rvbInt:.05,dlyInt:0,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true},
-    chh:{vol:.56,pan:.08,tune:0,a:.001,d:.06,r:.03,rvbInt:.02,dlyInt:0,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true},
-    clp:{vol:.76,pan:0,tune:0,a:.001,d:.14,r:.11,rvbInt:.04,dlyInt:0,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true},
-    rim:{vol:.66,pan:-.04,tune:0,a:.001,d:.06,r:.03,rvbInt:.01,dlyInt:0,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true},
-    sd:{vol:.82,pan:0,tune:0,a:.001,d:.22,r:.07,rvbInt:.06,dlyInt:.02,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true},
-    bd:{vol:.95,pan:0,tune:0,a:.001,d:.26,r:.05,rvbInt:.02,dlyInt:0,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true},
+    smp:{vol:.80,pan:0,tune:0,a:.001,d:.18,r:.09,rvbInt:0,dlyInt:0,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true,running:true,phaseShift:0},
+    cow:{vol:.70,pan:.08,tune:0,a:.001,d:.18,r:.08,rvbInt:.04,dlyInt:0,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true,running:true,phaseShift:0},
+    pc2:{vol:.72,pan:.10,tune:0,a:.001,d:.22,r:.12,rvbInt:.05,dlyInt:.01,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true,running:true,phaseShift:0},
+    pc1:{vol:.76,pan:-.10,tune:0,a:.001,d:.26,r:.12,rvbInt:.05,dlyInt:.01,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true,running:true,phaseShift:0},
+    ohh:{vol:.60,pan:.12,tune:0,a:.001,d:.28,r:.22,rvbInt:.05,dlyInt:0,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true,running:true,phaseShift:0},
+    chh:{vol:.56,pan:.08,tune:0,a:.001,d:.06,r:.03,rvbInt:.02,dlyInt:0,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true,running:true,phaseShift:0},
+    clp:{vol:.76,pan:0,tune:0,a:.001,d:.14,r:.11,rvbInt:.04,dlyInt:0,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true,running:true,phaseShift:0},
+    rim:{vol:.66,pan:-.04,tune:0,a:.001,d:.06,r:.03,rvbInt:.01,dlyInt:0,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true,running:true,phaseShift:0},
+    sd:{vol:.82,pan:0,tune:0,a:.001,d:.22,r:.07,rvbInt:.06,dlyInt:.02,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true,running:true,phaseShift:0},
+    bd:{vol:.95,pan:0,tune:0,a:.001,d:.26,r:.05,rvbInt:.02,dlyInt:0,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true,running:true,phaseShift:0},
   };
 
   const state = {
@@ -471,12 +471,15 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     track.start = clamp(Math.round(track.start || 0), 0, track.stepsLen - 1);
     track.tempo = clamp(+track.tempo || 1, 0.25, 4);
     track.tune = clamp(+track.tune || 0, -12, 12);
+    track.running = track.running !== false;
+    track.phaseShift = Math.round(+track.phaseShift || 0);
     return track;
   }
   function trackStepIndex(track, absStep){
     const len = getTrackLen(track);
     const start = clamp(Math.round(track.start || 0), 0, len - 1);
-    const norm = absStep % len;
+    const phaseShift = Math.round(+track.phaseShift || 0);
+    const norm = ((absStep - phaseShift) % len + len) % len;
     const shifted = (norm - start + len) % len;
     return Math.floor((shifted * track.tempo) % len);
   }
@@ -500,7 +503,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       steps: [...track.steps], vol: track.vol, pan: track.pan, tune: track.tune,
       a: track.a, d: track.d, r: track.r, rvbInt: track.rvbInt, dlyInt: track.dlyInt,
       tempo: track.tempo, start: track.start, stepsLen: track.stepsLen,
-      mute: track.mute, solo: track.solo, quant: track.quant,
+      mute: track.mute, solo: track.solo, quant: track.quant, running: track.running !== false, phaseShift: +track.phaseShift || 0,
       sampleSlot: track.sampleSlot, lastTriggeredSlot: track.lastTriggeredSlot,
       sampleBuffers: (track.sampleBuffers || []).map(b => b ? bufferToData(b) : null)
     };
@@ -947,6 +950,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     state.lastScheduledStep = step;
     syncPageToStep(step);
     state.tracks.forEach((t, i) => {
+      if(t.running === false) return;
       if(stepOn(t, step)){
         prepTrack(t, step);
         if(consumeLiveSkip(i, step, time)) return;
@@ -979,6 +983,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     if(audioCtx.state === 'suspended') audioCtx.resume();
     if(state.playing) return;
     state.playing = true;
+    state.tracks.forEach(t => { t.running = true; t.phaseShift = 0; });
     state.playhead = 0;
     state.lastScheduledStep = state.patternLength - 1;
     state.pendingLiveSkip = null;
@@ -1095,6 +1100,8 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     $('quantBtn').classList.toggle('active', t.quant);
     $('liveRecBtn').classList.toggle('active', state.liveRec);
     $('recSlotBtn').classList.toggle('active', state.sampleRecReady || state.sampleRecording);
+    $('startTrkBtn').textContent = t.running === false ? 'Start Track' : 'Stop Track';
+    $('startTrkBtn').classList.toggle('active', t.running === false);
     syncVerticalSliders();
   }
   function renderAll(){
@@ -1251,6 +1258,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       const when = step * stepDur + .02 + (step % 2 ? swingOffset : 0);
       const anySolo = state.tracks.some(x => x.solo);
       state.tracks.forEach(t => {
+        if(t.running === false) return;
         if(t.mute) return;
         if(anySolo && !t.solo) return;
         if(!stepOn(t, step)) return;
@@ -1436,14 +1444,33 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     });
     $('resetPerfBtn').addEventListener('pointerdown', e => { e.preventDefault(); resetTrack(); });
     $('startTrkBtn').addEventListener('pointerdown', e => {
-      e.preventDefault(); const t = state.tracks[state.currentTrack];
-      if(state.playing){
-        snapshot();
-        t.start = state.playhead % getTrackLen(t); $('trackStart').value = t.start; $('trackStartDisp').textContent = String(t.start + 1).padStart(2, '0'); save();
+      e.preventDefault();
+      const t = state.tracks[state.currentTrack];
+      snapshot();
+      if(state.playing && audioCtx){
+        const currentAbsStep = currentTransportStep(state.patternLength, false);
+        if(t.running === false){
+          t.phaseShift = currentAbsStep - (Math.round(t.start || 0) % getTrackLen(t));
+          t.running = true;
+          if(stepOn(t, currentAbsStep)){
+            prepTrack(t, currentAbsStep);
+            trigger(state.currentTrack, audioCtx.currentTime);
+          }
+          $('trackStatus').textContent = `TRK ${t.code}: ${t.name} läuft ab dem aktuell laufenden globalen Step wieder von seinem eigenen Beginn an.`;
+        } else {
+          t.running = false;
+          $('trackStatus').textContent = `TRK ${t.code}: ${t.name} wurde individuell gestoppt.`;
+        }
       } else {
-        if(state.currentTrack === 0) state.tracks[0].lastTriggeredSlot = state.tracks[0].sampleSlot;
-        trigger(state.currentTrack);
+        t.running = !t.running;
+        if(t.running){
+          t.phaseShift = 0;
+          $('trackStatus').textContent = `TRK ${t.code}: ${t.name} ist für den nächsten globalen Start wieder aktiv.`;
+        } else {
+          $('trackStatus').textContent = `TRK ${t.code}: ${t.name} bleibt beim nächsten globalen Start zunächst aus.`;
+        }
       }
+      syncUi(); drawTracks(); save();
     });
 
     $('recSlotBtn').addEventListener('pointerdown', async e => { e.preventDefault(); if(!state.sampleRecReady && !state.sampleRecording) await armRec(); else if(!state.sampleRecording) await startRec(); });
@@ -1456,7 +1483,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
 
   async function sw(){
     if('serviceWorker' in navigator){
-      try{ await navigator.serviceWorker.register('./service-worker.js?v=14'); }catch(err){ console.warn(err); }
+      try{ await navigator.serviceWorker.register('./service-worker.js?v=15'); }catch(err){ console.warn(err); }
     }
   }
 
