@@ -402,6 +402,8 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     liveRec: false,
     transportStartTime: 0,
     pendingLiveSkip: null,
+    historyPrimed: false,
+    historySuspended: false,
     tracks: TRACKS.map(t => ({
       ...t,
       steps: Array.from({length: TOTAL_STEPS}, () => t.type === 'smp' ? 0 : false),
@@ -453,9 +455,9 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       const holder = input.parentElement; if(holder.querySelector('.v-slider-ui')) return;
       const ui = document.createElement('div'); ui.className = 'v-slider-ui'; ui.innerHTML = '<div class="v-slider-groove"></div><div class="v-slider-fill"></div><div class="v-slider-knob"></div>';
       holder.appendChild(ui);
-      ui.addEventListener('pointerdown', e => { e.preventDefault(); try{ ui.setPointerCapture(e.pointerId); }catch(_e){} setVerticalFromPointer(input, e.clientY); });
+      ui.addEventListener('pointerdown', e => { e.preventDefault(); beginHistoryGesture(); try{ ui.setPointerCapture(e.pointerId); }catch(_e){} setVerticalFromPointer(input, e.clientY); });
       ui.addEventListener('pointermove', e => { if(ui.hasPointerCapture?.(e.pointerId)) setVerticalFromPointer(input, e.clientY); });
-      const fin = e => { if(typeof e.clientY === 'number') setVerticalFromPointer(input, e.clientY, true); try{ if(ui.hasPointerCapture?.(e.pointerId)) ui.releasePointerCapture(e.pointerId); }catch(_e){} };
+      const fin = e => { if(typeof e.clientY === 'number') setVerticalFromPointer(input, e.clientY, true); endHistoryGesture(); try{ if(ui.hasPointerCapture?.(e.pointerId)) ui.releasePointerCapture(e.pointerId); }catch(_e){} };
       ui.addEventListener('pointerup', fin); ui.addEventListener('pointercancel', fin); input.addEventListener('input', () => syncVerticalSlider(input)); syncVerticalSlider(input);
     });
   }
@@ -503,18 +505,32 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       sampleBuffers: (track.sampleBuffers || []).map(b => b ? bufferToData(b) : null)
     };
   }
-  function snapshot(){
-    state.redoStack = [];
-    state.undoStack.push({
+  function makeSnapshot(){
+    return {
       patternLength: state.patternLength, page: state.page, currentTrack: state.currentTrack,
       bpm: state.bpm, beat: state.beat, swing: state.swing,
       masterVol: state.masterVol, reverbAmt: state.reverbAmt, delayTime: state.delayTime, delayFb: state.delayFb,
       met: state.met, sync: state.sync, midi: state.midi, liveRec: state.liveRec,
       tracks: state.tracks.map(serializeTrack)
-    });
+    };
+  }
+  function snapshot(){
+    if(state.historySuspended) return;
+    state.redoStack = [];
+    state.undoStack.push(makeSnapshot());
     if(state.undoStack.length > 48) state.undoStack.shift();
   }
+  function beginHistoryGesture(){
+    if(state.historySuspended || state.historyPrimed) return;
+    snapshot();
+    state.historyPrimed = true;
+  }
+  function endHistoryGesture(){
+    state.historyPrimed = false;
+  }
   function restoreSnapshot(snap){
+    state.historySuspended = true;
+    endHistoryGesture();
     const wasPlaying = state.playing;
     const keepPlayhead = state.playhead;
     const keepLastStep = state.lastScheduledStep;
@@ -560,29 +576,20 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       stepEls.flat().forEach(b => b.classList.remove('playing'));
     }
     renderAll();
+    state.historySuspended = false;
   }
   function undo(){
+    endHistoryGesture();
     const snap = state.undoStack.pop();
     if(!snap) return;
-    state.redoStack.push({
-      patternLength: state.patternLength, page: state.page, currentTrack: state.currentTrack,
-      bpm: state.bpm, beat: state.beat, swing: state.swing,
-      masterVol: state.masterVol, reverbAmt: state.reverbAmt, delayTime: state.delayTime, delayFb: state.delayFb,
-      met: state.met, sync: state.sync, midi: state.midi, liveRec: state.liveRec,
-      tracks: state.tracks.map(serializeTrack)
-    });
+    state.redoStack.push(makeSnapshot());
     restoreSnapshot(snap);
   }
   function redo(){
+    endHistoryGesture();
     const snap = state.redoStack.pop();
     if(!snap) return;
-    state.undoStack.push({
-      patternLength: state.patternLength, page: state.page, currentTrack: state.currentTrack,
-      bpm: state.bpm, beat: state.beat, swing: state.swing,
-      masterVol: state.masterVol, reverbAmt: state.reverbAmt, delayTime: state.delayTime, delayFb: state.delayFb,
-      met: state.met, sync: state.sync, midi: state.midi, liveRec: state.liveRec,
-      tracks: state.tracks.map(serializeTrack)
-    });
+    state.undoStack.push(makeSnapshot());
     restoreSnapshot(snap);
   }
 
@@ -1176,6 +1183,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     localStorage.removeItem(STORE); stop(); location.reload();
   }
   function liveWrite(ti){
+    snapshot();
     const t = state.tracks[ti], len = getTrackLen(t);
     let step;
     if(state.playing) step = currentTransportStep(len, t.quant !== false);
@@ -1321,7 +1329,11 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
   }
 
   function bindTrackRange(id, prop, parse = v => +v){
-    $(id).addEventListener('input', (e) => {
+    const el = $(id);
+    ['pointerdown','keydown'].forEach(type => el.addEventListener(type, () => beginHistoryGesture(), {passive:true}));
+    ['pointerup','pointercancel','change','blur','keyup'].forEach(type => el.addEventListener(type, () => endHistoryGesture(), {passive:true}));
+    el.addEventListener('input', (e) => {
+      beginHistoryGesture();
       const t = state.tracks[state.currentTrack];
       t[prop] = parse(e.target.value);
       clampTrackState(t);
@@ -1345,19 +1357,28 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     $('len32Btn').addEventListener('pointerdown', (e) => { e.preventDefault(); setLen(32); });
     $('pageBtn').addEventListener('pointerdown', (e) => { e.preventDefault(); if(state.patternLength === 32){ state.page = state.page ? 0 : 1; renderAll(); save(); } });
 
-    $('masterVol').addEventListener('input', e => { state.masterVol = +e.target.value; ensureAudio(); setChain({ctx:audioCtx, masterGain, dlyFb, dlyNode}, state); save(); });
-    $('bpmInput').addEventListener('change', e => { state.bpm = clamp(+e.target.value || 120, 5, 500); ensureAudio(); setChain({ctx:audioCtx, masterGain, dlyFb, dlyNode}, state); save(); });
-    $('beatSelect').addEventListener('change', e => { state.beat = e.target.value; save(); });
+    $('masterVol').addEventListener('input', e => { beginHistoryGesture(); state.masterVol = +e.target.value; ensureAudio(); setChain({ctx:audioCtx, masterGain, dlyFb, dlyNode}, state); save(); });
+    ['pointerdown','keydown'].forEach(type => $('masterVol').addEventListener(type, () => beginHistoryGesture(), {passive:true}));
+    ['pointerup','pointercancel','change','blur','keyup'].forEach(type => $('masterVol').addEventListener(type, () => endHistoryGesture(), {passive:true}));
+    $('bpmInput').addEventListener('change', e => { snapshot(); state.bpm = clamp(+e.target.value || 120, 5, 500); ensureAudio(); setChain({ctx:audioCtx, masterGain, dlyFb, dlyNode}, state); save(); });
+    $('beatSelect').addEventListener('change', e => { snapshot(); state.beat = e.target.value; save(); });
     $('swingInput').addEventListener('change', e => {
+      snapshot();
       const pct = clamp(Math.round(+e.target.value || 65), 50, 85); state.swing = pct / 100; e.target.value = pct; save(); $('trackStatus').textContent = `Swing auf ${pct} % gesetzt.`;
     });
-    $('reverbAmt').addEventListener('input', e => { state.reverbAmt = +e.target.value; save(); });
-    $('delayTime').addEventListener('input', e => { state.delayTime = +e.target.value; ensureAudio(); setChain({ctx:audioCtx, masterGain, dlyFb, dlyNode}, state); save(); });
-    $('delayFb').addEventListener('input', e => { state.delayFb = +e.target.value; ensureAudio(); setChain({ctx:audioCtx, masterGain, dlyFb, dlyNode}, state); save(); });
+    $('reverbAmt').addEventListener('input', e => { beginHistoryGesture(); state.reverbAmt = +e.target.value; save(); });
+    ['pointerdown','keydown'].forEach(type => $('reverbAmt').addEventListener(type, () => beginHistoryGesture(), {passive:true}));
+    ['pointerup','pointercancel','change','blur','keyup'].forEach(type => $('reverbAmt').addEventListener(type, () => endHistoryGesture(), {passive:true}));
+    $('delayTime').addEventListener('input', e => { beginHistoryGesture(); state.delayTime = +e.target.value; ensureAudio(); setChain({ctx:audioCtx, masterGain, dlyFb, dlyNode}, state); save(); });
+    ['pointerdown','keydown'].forEach(type => $('delayTime').addEventListener(type, () => beginHistoryGesture(), {passive:true}));
+    ['pointerup','pointercancel','change','blur','keyup'].forEach(type => $('delayTime').addEventListener(type, () => endHistoryGesture(), {passive:true}));
+    $('delayFb').addEventListener('input', e => { beginHistoryGesture(); state.delayFb = +e.target.value; ensureAudio(); setChain({ctx:audioCtx, masterGain, dlyFb, dlyNode}, state); save(); });
+    ['pointerdown','keydown'].forEach(type => $('delayFb').addEventListener(type, () => beginHistoryGesture(), {passive:true}));
+    ['pointerup','pointercancel','change','blur','keyup'].forEach(type => $('delayFb').addEventListener(type, () => endHistoryGesture(), {passive:true}));
 
-    $('metBtn').addEventListener('pointerdown', e => { e.preventDefault(); state.met = !state.met; syncUi(); save(); });
-    $('syncBtn').addEventListener('pointerdown', e => { e.preventDefault(); state.sync = !state.sync; syncUi(); ensureAudio(); setChain({ctx:audioCtx, masterGain, dlyFb, dlyNode}, state); save(); });
-    $('midiBtn').addEventListener('pointerdown', e => { e.preventDefault(); state.midi = !state.midi; syncUi(); save(); });
+    $('metBtn').addEventListener('pointerdown', e => { e.preventDefault(); snapshot(); state.met = !state.met; syncUi(); save(); });
+    $('syncBtn').addEventListener('pointerdown', e => { e.preventDefault(); snapshot(); state.sync = !state.sync; syncUi(); ensureAudio(); setChain({ctx:audioCtx, masterGain, dlyFb, dlyNode}, state); save(); });
+    $('midiBtn').addEventListener('pointerdown', e => { e.preventDefault(); snapshot(); state.midi = !state.midi; syncUi(); save(); });
 
     $('fillBtn').addEventListener('pointerdown', e => { e.preventDefault(); fill(); });
     $('variationBtn').addEventListener('pointerdown', e => { e.preventDefault(); vary(); });
@@ -1391,6 +1412,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     bindTrackRange('trackStart', 'start', v => +v);
 
     $('trackStepsLen').addEventListener('change', e => {
+      snapshot();
       const t = state.tracks[state.currentTrack];
       t.stepsLen = clamp(Math.round(+e.target.value || state.patternLength), 1, state.patternLength);
       if(t.start > t.stepsLen - 1) t.start = t.stepsLen - 1;
@@ -1398,10 +1420,10 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       syncUi(); drawTracks(); save(); $('trackStatus').textContent = `TRK ${t.code}: ${t.name} läuft nun über ${t.stepsLen} Steps. Schritte außerhalb dieses Bereichs sind gesperrt.`;
     });
 
-    $('muteBtn').addEventListener('pointerdown', e => { e.preventDefault(); const t = state.tracks[state.currentTrack]; t.mute = !t.mute; syncUi(); drawTracks(); save(); });
-    $('soloBtn').addEventListener('pointerdown', e => { e.preventDefault(); const t = state.tracks[state.currentTrack]; const next = !t.solo; state.tracks.forEach(x => x.solo = false); t.solo = next; syncUi(); drawTracks(); save(); });
-    $('quantBtn').addEventListener('pointerdown', e => { e.preventDefault(); const t = state.tracks[state.currentTrack]; t.quant = !t.quant; syncUi(); save(); });
-    $('liveRecBtn').addEventListener('pointerdown', e => { e.preventDefault(); state.liveRec = !state.liveRec; syncUi(); save(); $('trackStatus').textContent = state.liveRec ? 'LIVE REC aktiv. TRIGGER schreibt nun Steps in den ausgewählten Track.' : 'LIVE REC aus.'; });
+    $('muteBtn').addEventListener('pointerdown', e => { e.preventDefault(); snapshot(); const t = state.tracks[state.currentTrack]; t.mute = !t.mute; syncUi(); drawTracks(); save(); });
+    $('soloBtn').addEventListener('pointerdown', e => { e.preventDefault(); snapshot(); const t = state.tracks[state.currentTrack]; const next = !t.solo; state.tracks.forEach(x => x.solo = false); t.solo = next; syncUi(); drawTracks(); save(); });
+    $('quantBtn').addEventListener('pointerdown', e => { e.preventDefault(); snapshot(); const t = state.tracks[state.currentTrack]; t.quant = !t.quant; syncUi(); save(); });
+    $('liveRecBtn').addEventListener('pointerdown', e => { e.preventDefault(); snapshot(); state.liveRec = !state.liveRec; syncUi(); save(); $('trackStatus').textContent = state.liveRec ? 'LIVE REC aktiv. TRIGGER schreibt nun Steps in den ausgewählten Track.' : 'LIVE REC aus.'; });
     $('triggerBtn').addEventListener('pointerdown', e => {
       e.preventDefault(); ensureAudio();
       if(state.currentTrack === 0) state.tracks[0].lastTriggeredSlot = state.tracks[0].sampleSlot;
@@ -1416,6 +1438,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     $('startTrkBtn').addEventListener('pointerdown', e => {
       e.preventDefault(); const t = state.tracks[state.currentTrack];
       if(state.playing){
+        snapshot();
         t.start = state.playhead % getTrackLen(t); $('trackStart').value = t.start; $('trackStartDisp').textContent = String(t.start + 1).padStart(2, '0'); save();
       } else {
         if(state.currentTrack === 0) state.tracks[0].lastTriggeredSlot = state.tracks[0].sampleSlot;
@@ -1427,13 +1450,13 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
 
     slotEls = Array.from(document.querySelectorAll('[data-slot]'));
     slotEls.forEach((b, idx) => b.addEventListener('pointerdown', e => {
-      e.preventDefault(); state.currentTrack = 0; state.tracks[0].sampleSlot = idx + 1; syncUi(); drawTracks(); drawSlots(); save();
+      e.preventDefault(); snapshot(); state.currentTrack = 0; state.tracks[0].sampleSlot = idx + 1; syncUi(); drawTracks(); drawSlots(); save();
     }));
   }
 
   async function sw(){
     if('serviceWorker' in navigator){
-      try{ await navigator.serviceWorker.register('./service-worker.js?v=13'); }catch(err){ console.warn(err); }
+      try{ await navigator.serviceWorker.register('./service-worker.js?v=14'); }catch(err){ console.warn(err); }
     }
   }
 
