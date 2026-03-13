@@ -367,6 +367,14 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     sd:{vol:.82,pan:0,tune:0,a:.001,d:.22,r:.07,rvbInt:.06,dlyInt:.02,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true,running:true,phaseShift:0},
     bd:{vol:.95,pan:0,tune:0,a:.001,d:.26,r:.05,rvbInt:.02,dlyInt:0,tempo:1,start:0,stepsLen:16,mute:false,solo:false,quant:true,running:true,phaseShift:0},
   };
+  const makeFreshTracks = () => TRACKS.map(t => ({
+    ...t,
+    steps: Array.from({length: TOTAL_STEPS}, () => t.type === 'smp' ? 0 : false),
+    sampleSlot: 1,
+    sampleBuffers: [null, null, null, null],
+    lastTriggeredSlot: 1,
+    ...defaults[t.type]
+  }));
 
   const state = {
     patternLength: 16,
@@ -405,14 +413,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     pendingLiveSkip: null,
     historyPrimed: false,
     historySuspended: false,
-    tracks: TRACKS.map(t => ({
-      ...t,
-      steps: Array.from({length: TOTAL_STEPS}, () => t.type === 'smp' ? 0 : false),
-      sampleSlot: 1,
-      sampleBuffers: [null, null, null, null],
-      lastTriggeredSlot: 1,
-      ...defaults[t.type]
-    }))
+    tracks: makeFreshTracks()
   };
 
   let audioCtx, masterGain, dryGain, verbSend, dlySend, convolver, dlyNode, dlyFb, compressor;
@@ -865,18 +866,17 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       const s = audioCtx.createBufferSource();
       const g = audioCtx.createGain();
       const rate = ratio(t.tune);
-      const baseDur = Math.max(.03, buf.duration / Math.max(.125, rate));
+      const playDur = Math.max(.04, buf.duration / Math.max(.125, rate));
       const aNorm = clamp((+t.a || 0) / .2, 0, 1);
       const dNorm = clamp(((+t.d || .02) - .02) / 1.38, 0, 1);
       const rNorm = clamp(((+t.r || .02) - .02) / 1.38, 0, 1);
-      const att = Math.max(.001, Math.min(.22, .001 + aNorm * Math.min(.22, baseDur * .55)));
-      const sustain = .72;
-      const attackEnd = when + Math.min(att, Math.max(.004, baseDur * .45));
-      const decayWindow = Math.max(.008, .012 + dNorm * Math.min(.55, baseDur * .42));
-      const decayEnd = Math.min(when + baseDur - .006, attackEnd + decayWindow);
-      const rel = Math.max(.01, .01 + rNorm * Math.min(.6, baseDur * .55));
-      const releaseStart = Math.max(decayEnd, when + Math.max(.012, baseDur - rel));
-      const endTime = Math.max(releaseStart + .008, when + baseDur);
+      const attackTime = Math.max(.001, .002 + aNorm * Math.min(.24, playDur * .48));
+      const attackEnd = Math.min(when + attackTime, when + Math.max(.01, playDur * .42));
+      const sustain = clamp(.9 - dNorm * .38, .46, .92);
+      const decayTime = Math.max(.01, .02 + dNorm * Math.min(.42, playDur * .52));
+      const decayEnd = Math.min(when + Math.max(.03, playDur * .82), attackEnd + decayTime);
+      const releaseStart = Math.max(decayEnd, when + playDur * (.26 + rNorm * .66));
+      const endTime = Math.min(when + playDur + .01, Math.max(releaseStart + .012, when + playDur * (.38 + rNorm * .62)));
       s.buffer = buf;
       s.playbackRate.value = rate;
       g.gain.cancelScheduledValues(when);
@@ -1174,7 +1174,16 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
   }
   function clearAll(){
     snapshot();
-    state.tracks.forEach(t => { t.steps = Array.from({length: TOTAL_STEPS}, () => t.type === 'smp' ? 0 : false); });
+    state.tracks.forEach(t => {
+      t.steps = Array.from({length: TOTAL_STEPS}, () => t.type === 'smp' ? 0 : false);
+      if(!state.playing){ t.running = true; t.phaseShift = 0; }
+    });
+    state.playhead = 0;
+    state.lastScheduledStep = state.patternLength - 1;
+    state.nextNoteTime = state.playing && audioCtx ? audioCtx.currentTime + .05 : 0;
+    state.transportStartTime = state.playing && audioCtx ? state.nextNoteTime : 0;
+    state.pendingLiveSkip = null;
+    state.sampleTriggerBlockUntil = 0;
     drawTracks(); save();
   }
   function clearTrack(){
@@ -1206,7 +1215,42 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     $('trackStatus').textContent = `TRK ${t.code}: ${t.name} wurde auf seine Parameter-Grundstellung zurückgesetzt.`;
   }
   function resetAll(){
-    localStorage.removeItem(STORE); stop(); location.reload();
+    localStorage.removeItem(STORE);
+    disarmRec();
+    stop();
+    state.patternLength = 16;
+    state.page = 0;
+    state.currentTrack = 0;
+    state.bpm = 120;
+    state.beat = '4/4';
+    state.swing = 0.65;
+    state.masterVol = 0.8;
+    state.reverbAmt = 0;
+    state.delayTime = 0;
+    state.delayFb = 0;
+    state.met = false;
+    state.sync = true;
+    state.midi = false;
+    state.undoStack = [];
+    state.redoStack = [];
+    state.playhead = 0;
+    state.lastScheduledStep = 0;
+    state.nextNoteTime = 0;
+    state.timer = null;
+    state.renderLock = false;
+    state.sampleTriggerBlockUntil = 0;
+    state.manualRecordCursor = 0;
+    state.liveRec = false;
+    state.transportStartTime = 0;
+    state.pendingLiveSkip = null;
+    state.historyPrimed = false;
+    state.historySuspended = false;
+    state.tracks = makeFreshTracks();
+    ensureAudio();
+    setChain({ctx:audioCtx, masterGain, dlyFb, dlyNode}, state);
+    renderAll();
+    save();
+    $('trackStatus').textContent = 'Globaler Grundzustand wiederhergestellt.';
   }
   function liveWrite(ti){
     snapshot();
@@ -1305,11 +1349,15 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     if(state.sampleRecTimer){ clearTimeout(state.sampleRecTimer); state.sampleRecTimer = null; }
     if(state.sampleStream){ try{ state.sampleStream.getTracks().forEach(t => t.stop()); }catch(_e){} }
     state.sampleStream = null; state.sampleSource = null; state.sampleProcessor = null; state.sampleMonitorGain = null; state.sampleRecording = false; state.sampleRecReady = false;
+    if(audioCtx){
+      try{ if(audioCtx.state !== 'running') audioCtx.resume(); }catch(_e){}
+      try{ masterGain && masterGain.gain.setValueAtTime(state.masterVol, audioCtx.currentTime); }catch(_e){}
+    }
     syncUi(); if(message) $('trackStatus').textContent = message;
   }
   async function ensureStream(){
     if(state.sampleStream) return state.sampleStream;
-    state.sampleStream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true, noiseSuppression:true, autoGainControl:true}});
+    state.sampleStream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false, noiseSuppression:false, autoGainControl:false, channelCount:1}});
     return state.sampleStream;
   }
   async function armRec(){
@@ -1324,7 +1372,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     try{
       ensureAudio(); if(audioCtx.state === 'suspended') await audioCtx.resume();
       const stream = await ensureStream(), source = audioCtx.createMediaStreamSource(stream), proc = audioCtx.createScriptProcessor(2048, 1, 1), monitor = audioCtx.createGain(), chunks = [];
-      monitor.gain.value = 0;
+      monitor.gain.setValueAtTime(0, audioCtx.currentTime);
       state.sampleChunks = chunks; state.sampleRecording = true; state.sampleRecReady = false; state.sampleSource = source; state.sampleProcessor = proc; state.sampleMonitorGain = monitor; syncUi();
       $('trackStatus').textContent = 'Aufnahme läuft …';
       proc.onaudioprocess = e => chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
@@ -1344,13 +1392,19 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     const mono = new Float32Array(total); let offset = 0;
     state.sampleChunks.forEach(a => { mono.set(a, offset); offset += a.length; });
     const len = Math.min(mono.length, Math.floor(audioCtx.sampleRate * .6));
+    let peak = 0;
     const fade = Math.min(len, Math.floor(audioCtx.sampleRate * .02));
     const b = audioCtx.createBuffer(1, len, audioCtx.sampleRate), ch = b.getChannelData(0);
     for(let i = 0; i < len; i++){
       let x = mono[i] || 0;
       if(i < fade) x *= i / Math.max(1, fade);
       if(i > len - fade) x *= (len - i) / Math.max(1, fade);
+      peak = Math.max(peak, Math.abs(x));
       ch[i] = x;
+    }
+    if(peak > 0.0001){
+      const gain = Math.min(1.6, 0.92 / peak);
+      for(let i = 0; i < len; i++) ch[i] *= gain;
     }
     const smp = state.tracks[0];
     smp.sampleBuffers[smp.sampleSlot - 1] = b;
@@ -1513,7 +1567,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
 
   async function sw(){
     if('serviceWorker' in navigator){
-      try{ await navigator.serviceWorker.register('./service-worker.js?v=18'); }catch(err){ console.warn(err); }
+      try{ await navigator.serviceWorker.register('./service-worker.js?v=19'); }catch(err){ console.warn(err); }
     }
   }
 
