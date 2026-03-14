@@ -867,34 +867,36 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       const s = audioCtx.createBufferSource();
       const g = audioCtx.createGain();
       const rate = ratio(t.tune);
-      const playDur = Math.max(.05, buf.duration / Math.max(.125, rate));
+      const playDur = Math.max(.06, buf.duration / Math.max(.125, rate));
       const aNorm = clamp((+t.a || 0) / .2, 0, 1);
       const dNorm = clamp(((+t.d || .02) - .02) / 1.38, 0, 1);
       const rNorm = clamp(((+t.r || .02) - .02) / 1.38, 0, 1);
-      const attackTime = Math.min(Math.max(.001, aNorm * Math.min(.65, playDur * .88)), Math.max(.002, playDur * .9));
+      const attackTime = Math.min(Math.max(.001, 0.001 + aNorm * Math.min(.42, playDur * .88)), Math.max(.002, playDur * .92));
       const attackEnd = when + attackTime;
-      const sustain = clamp(1 - dNorm * .82, .14, 1);
-      const maxBody = Math.max(.02, playDur - attackTime - .012);
-      const decayTime = Math.min(maxBody, Math.max(.01, dNorm * Math.min(.52, playDur * .72)));
+      const sustain = clamp(.92 - dNorm * .56, .28, .92);
+      const decayBudget = Math.max(.012, playDur - attackTime - .02);
+      const decayTime = Math.min(decayBudget, .008 + dNorm * Math.min(.42, playDur * .74));
       const decayEnd = attackEnd + decayTime;
-      const releaseTail = Math.max(.02, .02 + rNorm * Math.min(.6, playDur * .95));
-      const releaseStart = Math.min(Math.max(decayEnd, when + Math.max(.01, playDur - releaseTail)), when + playDur - .006);
+      const releaseBudget = Math.max(.012, playDur - attackTime - decayTime);
+      const releaseTail = Math.min(releaseBudget, .012 + rNorm * Math.min(.7, playDur * .92));
+      const holdTime = Math.max(.004, playDur - attackTime - decayTime - releaseTail);
+      const releaseStart = decayEnd + holdTime;
       const endTime = releaseStart + releaseTail;
       s.buffer = buf;
       s.playbackRate.value = rate;
       g.gain.cancelScheduledValues(when);
       g.gain.setValueAtTime(0.0001, when);
       if(attackTime <= .002){
-        g.gain.setValueAtTime(1, when + .002);
+        g.gain.setValueAtTime(1.0, when + .002);
       } else {
-        g.gain.linearRampToValueAtTime(1, attackEnd);
+        g.gain.linearRampToValueAtTime(1.0, attackEnd);
       }
       g.gain.linearRampToValueAtTime(sustain, decayEnd);
       g.gain.setValueAtTime(sustain, releaseStart);
-      g.gain.exponentialRampToValueAtTime(0.0001, endTime);
+      g.gain.exponentialRampToValueAtTime(0.0001, Math.max(releaseStart + .012, endTime));
       s.connect(g).connect(o);
       s.start(when);
-      s.stop(endTime + .02);
+      s.stop(Math.max(endTime + .02, when + .04));
       return;
     }
     drum(audioCtx, chain, t.type, when, t);
@@ -1411,20 +1413,25 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     }
     const mono = new Float32Array(total); let offset = 0;
     state.sampleChunks.forEach(a => { mono.set(a, offset); offset += a.length; });
-    const len = Math.min(mono.length, Math.floor(audioCtx.sampleRate * .6));
-    let peak = 0;
-    const fade = Math.min(len, Math.floor(audioCtx.sampleRate * .02));
+    const len = Math.min(mono.length, Math.floor(audioCtx.sampleRate * 1.25));
+    let peak = 0, sumSq = 0;
+    const fadeIn = Math.min(len, Math.floor(audioCtx.sampleRate * .006));
+    const fadeOut = Math.min(len, Math.floor(audioCtx.sampleRate * .016));
     const b = audioCtx.createBuffer(1, len, audioCtx.sampleRate), ch = b.getChannelData(0);
     for(let i = 0; i < len; i++){
       let x = mono[i] || 0;
-      if(i < fade) x *= i / Math.max(1, fade);
-      if(i > len - fade) x *= (len - i) / Math.max(1, fade);
+      if(i < fadeIn) x *= i / Math.max(1, fadeIn);
+      if(i > len - fadeOut) x *= (len - i) / Math.max(1, fadeOut);
       peak = Math.max(peak, Math.abs(x));
+      sumSq += x * x;
       ch[i] = x;
     }
-    if(peak > 0.0001){
-      const gain = Math.min(1.6, 0.92 / peak);
-      for(let i = 0; i < len; i++) ch[i] *= gain;
+    const rms = Math.sqrt(sumSq / Math.max(1, len));
+    if(peak > 0.00001){
+      const peakGain = 0.98 / peak;
+      const rmsGain = rms > 0.00001 ? 0.22 / rms : peakGain;
+      const gain = Math.min(4.0, Math.max(1.25, Math.min(peakGain, rmsGain)));
+      for(let i = 0; i < len; i++) ch[i] = Math.tanh(ch[i] * gain * 1.18) * 0.92;
     }
     const smp = state.tracks[0];
     smp.sampleBuffers[smp.sampleSlot - 1] = b;
@@ -1592,7 +1599,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
 
   async function sw(){
     if('serviceWorker' in navigator){
-      try{ await navigator.serviceWorker.register('./service-worker.js?v=19'); }catch(err){ console.warn(err); }
+      try{ await navigator.serviceWorker.register('./service-worker.js?v=21'); }catch(err){ console.warn(err); }
     }
   }
 
