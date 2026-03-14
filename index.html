@@ -498,7 +498,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     const stepDur = 60 / state.bpm / 4;
     const elapsed = Math.max(0, audioCtx.currentTime - state.transportStartTime);
     const raw = elapsed / stepDur;
-    return quantized ? Math.round(raw) : Math.floor(raw);
+    return quantized ? Math.round(raw) : raw;
   }
   function currentVisualGlobalStep(){
     if(state.playing && audioCtx) return currentTransportAbsoluteStep(false);
@@ -1002,18 +1002,40 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     if(rel === Math.max(0, fill.length - 2) && cow >= 0) trigger(cow, time, 'fill');
     if(rel === fill.length - 1 && ohh >= 0) trigger(ohh, time, 'fill');
   }
+  function trackIntervalEvents(track, absStep){
+    const len = getTrackLen(track);
+    const start = clamp(Math.round(track.start || 0), 0, len - 1);
+    const phaseShift = Math.round(+track.phaseShift || 0);
+    const tempo = clamp(+track.tempo || 1, 0.25, 4);
+    const logicalStart = (absStep - phaseShift - start) * tempo;
+    const logicalEnd = ((absStep + 1) - phaseShift - start) * tempo;
+    const eps = 1e-9;
+    const events = [];
+    for(let k = Math.ceil(logicalStart - eps); k < logicalEnd - eps; k++){
+      const boundaryAbs = (k / tempo) + phaseShift + start;
+      let fraction = boundaryAbs - absStep;
+      if(fraction < -eps || fraction >= 1 - eps) continue;
+      fraction = clamp(fraction, 0, 0.999999);
+      events.push({ stepIndex: mod(k, len), fraction });
+    }
+    return events;
+  }
   function scheduleStep(step, time){
     state.lastScheduledAbsStep = step;
     state.lastScheduledStep = mod(step, state.patternLength);
     syncPageToStep(step);
+    const stepDur = 60 / state.bpm / 4;
     state.tracks.forEach((t, i) => {
       if(t.running === false) return;
-      if(!trackStepChanged(t, step)) return;
-      if(stepOn(t, step)){
-        prepTrack(t, step);
-        if(consumeLiveSkip(i, trackStepIndex(t, step), time)) return;
-        trigger(i, time);
-      }
+      const events = trackIntervalEvents(t, step);
+      events.forEach(ev => {
+        const eventTime = time + (ev.fraction * stepDur);
+        const isOn = t.type === 'smp' ? t.steps[ev.stepIndex] > 0 : !!t.steps[ev.stepIndex];
+        if(!isOn) return;
+        if(t.type === 'smp') t.lastTriggeredSlot = t.steps[ev.stepIndex] || t.sampleSlot;
+        if(consumeLiveSkip(i, ev.stepIndex, eventTime)) return;
+        trigger(i, eventTime);
+      });
     });
     runFillOverlay(step, time);
     metronome(step, time);
