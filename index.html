@@ -476,6 +476,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     track.tune = clamp(+track.tune || 0, -12, 12);
     track.running = track.running !== false;
     track.phaseShift = Math.round(+track.phaseShift || 0);
+    track.holdVisualStep = clamp(Math.round(+track.holdVisualStep || 0), 0, Math.max(0, track.stepsLen - 1));
     return track;
   }
   function trackStepIndex(track, absStep){
@@ -485,6 +486,16 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     const norm = ((absStep - phaseShift) % len + len) % len;
     const shifted = (norm - start + len) % len;
     return Math.floor((shifted * track.tempo) % len);
+  }
+  function currentVisualGlobalStep(){
+    if(state.playing && audioCtx) return currentTransportStep(state.patternLength, false);
+    return ((state.lastScheduledStep % state.patternLength) + state.patternLength) % state.patternLength;
+  }
+  function trackVisualStep(track, absStep){
+    if(track.running === false){
+      return clamp(Math.round(+track.holdVisualStep || 0), 0, Math.max(0, getTrackLen(track) - 1));
+    }
+    return trackStepIndex(track, absStep);
   }
 
   function bufferToData(buffer){
@@ -508,6 +519,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       tempo: track.tempo, start: track.start, stepsLen: track.stepsLen,
       mute: track.mute, solo: track.solo, quant: track.quant, running: track.running !== false, phaseShift: +track.phaseShift || 0,
       sampleSlot: track.sampleSlot, lastTriggeredSlot: track.lastTriggeredSlot,
+      holdVisualStep: clamp(Math.round(+track.holdVisualStep || 0), 0, Math.max(0, getTrackLen(track) - 1)),
       sampleBuffers: (track.sampleBuffers || []).map(b => b ? bufferToData(b) : null)
     };
   }
@@ -976,9 +988,14 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
   }
   function paintPlayhead(){
     stepEls.flat().forEach(b => b.classList.remove('playing'));
-    const start = state.page * 16;
-    const local = (state.lastScheduledStep % state.patternLength) - start;
-    if(local >= 0 && local < 16) stepEls.forEach(row => row[local]?.classList.add('playing'));
+    if(!state.playing) return;
+    const globalStep = currentVisualGlobalStep();
+    const pageStart = state.page * 16;
+    state.tracks.forEach((t, ti) => {
+      const localStep = trackVisualStep(t, globalStep);
+      const cell = localStep - pageStart;
+      if(cell >= 0 && cell < 16) stepEls[ti][cell]?.classList.add('playing');
+    });
   }
   function tick(){
     if(!state.playing || !audioCtx) return;
@@ -998,7 +1015,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     if(audioCtx.state === 'suspended') audioCtx.resume();
     if(state.playing) return;
     state.playing = true;
-    state.tracks.forEach(t => { t.running = true; t.phaseShift = 0; });
+    state.tracks.forEach(t => { t.running = true; t.phaseShift = 0; t.holdVisualStep = 0; });
     state.playhead = 0;
     state.lastScheduledStep = state.patternLength - 1;
     state.pendingLiveSkip = null;
@@ -1563,12 +1580,14 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
         if(t.running === false){
           t.phaseShift = currentAbsStep - (Math.round(t.start || 0) % getTrackLen(t));
           t.running = true;
+          t.holdVisualStep = 0;
           if(stepOn(t, currentAbsStep)){
             prepTrack(t, currentAbsStep);
             trigger(state.currentTrack, audioCtx.currentTime, 'manual-selected');
           }
           $('trackStatus').textContent = `TRK ${t.code}: ${t.name} läuft ab dem aktuell laufenden globalen Step wieder von seinem eigenen Beginn an.`;
         } else {
+          t.holdVisualStep = trackStepIndex(t, currentAbsStep);
           t.running = false;
           $('trackStatus').textContent = `TRK ${t.code}: ${t.name} wurde individuell gestoppt.`;
         }
@@ -1576,8 +1595,10 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
         t.running = !t.running;
         if(t.running){
           t.phaseShift = 0;
+          t.holdVisualStep = 0;
           $('trackStatus').textContent = `TRK ${t.code}: ${t.name} ist für den nächsten globalen Start wieder aktiv.`;
         } else {
+          t.holdVisualStep = 0;
           $('trackStatus').textContent = `TRK ${t.code}: ${t.name} bleibt beim nächsten globalen Start zunächst aus.`;
         }
       }
@@ -1599,7 +1620,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
 
   async function sw(){
     if('serviceWorker' in navigator){
-      try{ await navigator.serviceWorker.register('./service-worker.js?v=21'); }catch(err){ console.warn(err); }
+      try{ await navigator.serviceWorker.register('./service-worker.js?v=22'); }catch(err){ console.warn(err); }
     }
   }
 
