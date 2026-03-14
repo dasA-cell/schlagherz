@@ -394,7 +394,9 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     undoStack: [],
     redoStack: [],
     playhead: 0,
+    absolutePlayhead: 0,
     lastScheduledStep: 0,
+    lastScheduledAbsStep: 0,
     nextNoteTime: 0,
     timer: null,
     renderLock: false,
@@ -412,6 +414,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     liveRec: false,
     transportStartTime: 0,
     pendingLiveSkip: null,
+    fillOverlay: null,
     historyPrimed: false,
     historySuspended: false,
     tracks: makeFreshTracks()
@@ -426,6 +429,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
   const $ = (id) => document.getElementById(id);
   const deep = (x) => JSON.parse(JSON.stringify(x));
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const mod = (n, m) => ((n % m) + m) % m;
 
   let verticalSliders = [];
   function stepPrecision(step){ const s = String(step ?? ''); return s.includes('.') ? s.split('.')[1].length : 0; }
@@ -483,13 +487,22 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     const len = getTrackLen(track);
     const start = clamp(Math.round(track.start || 0), 0, len - 1);
     const phaseShift = Math.round(+track.phaseShift || 0);
-    const norm = ((absStep - phaseShift) % len + len) % len;
-    const shifted = (norm - start + len) % len;
-    return Math.floor((shifted * track.tempo) % len);
+    const logical = (absStep - phaseShift - start) * track.tempo;
+    return mod(Math.floor(logical), len);
+  }
+  function trackStepChanged(track, absStep){
+    return trackStepIndex(track, absStep) !== trackStepIndex(track, absStep - 1);
+  }
+  function currentTransportAbsoluteStep(quantized = true){
+    if(!audioCtx || !state.playing) return 0;
+    const stepDur = 60 / state.bpm / 4;
+    const elapsed = Math.max(0, audioCtx.currentTime - state.transportStartTime);
+    const raw = elapsed / stepDur;
+    return quantized ? Math.round(raw) : Math.floor(raw);
   }
   function currentVisualGlobalStep(){
-    if(state.playing && audioCtx) return currentTransportStep(state.patternLength, false);
-    return ((state.lastScheduledStep % state.patternLength) + state.patternLength) % state.patternLength;
+    if(state.playing && audioCtx) return currentTransportAbsoluteStep(false);
+    return state.lastScheduledAbsStep || 0;
   }
   function trackVisualStep(track, absStep){
     if(track.running === false){
@@ -551,7 +564,9 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     endHistoryGesture();
     const wasPlaying = state.playing;
     const keepPlayhead = state.playhead;
+    const keepAbsolutePlayhead = state.absolutePlayhead || 0;
     const keepLastStep = state.lastScheduledStep;
+    const keepLastAbsStep = state.lastScheduledAbsStep || 0;
     const keepNextNoteTime = state.nextNoteTime;
     const keepTransportStartTime = state.transportStartTime;
     if(!wasPlaying && state.timer){ clearInterval(state.timer); state.timer = null; }
@@ -577,17 +592,21 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     if(audioCtx) hydrate();
     if(wasPlaying && audioCtx){
       state.playing = true;
-      state.playhead = ((keepPlayhead % state.patternLength) + state.patternLength) % state.patternLength;
-      state.lastScheduledStep = ((keepLastStep % state.patternLength) + state.patternLength) % state.patternLength;
+      state.playhead = mod(keepPlayhead, state.patternLength);
+      state.absolutePlayhead = Math.max(0, keepAbsolutePlayhead || state.playhead);
+      state.lastScheduledStep = mod(keepLastStep, state.patternLength);
+      state.lastScheduledAbsStep = keepLastAbsStep;
       state.nextNoteTime = Math.max(audioCtx.currentTime + .01, keepNextNoteTime || (audioCtx.currentTime + .05));
-      state.transportStartTime = keepTransportStartTime || (state.nextNoteTime - (state.playhead * (60 / state.bpm / 4)));
-      if(state.patternLength === 32) state.page = state.lastScheduledStep >= 16 ? 1 : 0;
+      state.transportStartTime = keepTransportStartTime || (state.nextNoteTime - (state.absolutePlayhead * (60 / state.bpm / 4)));
+      if(state.patternLength === 32) state.page = mod(state.lastScheduledAbsStep, state.patternLength) >= 16 ? 1 : 0;
       if(!state.timer) state.timer = setInterval(tick, 25);
       $('transportDisplay').textContent = 'RUN';
     } else {
       state.playing = false;
       state.playhead = 0;
+      state.absolutePlayhead = 0;
       state.lastScheduledStep = state.patternLength - 1;
+      state.lastScheduledAbsStep = -1;
       state.nextNoteTime = 0;
       state.transportStartTime = 0;
       $('transportDisplay').textContent = 'STOP';
@@ -950,12 +969,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     return false;
   }
   function currentTransportStep(len, quantized = true){
-    if(!audioCtx || !state.playing) return 0;
-    const stepDur = 60 / state.bpm / 4;
-    const elapsed = Math.max(0, audioCtx.currentTime - state.transportStartTime);
-    const raw = elapsed / stepDur;
-    const step = quantized ? Math.round(raw) : Math.floor(raw);
-    return ((step % len) + len) % len;
+    return mod(currentTransportAbsoluteStep(quantized), len);
   }
   function metronome(step, time){
     if(!state.met) return;
@@ -973,17 +987,35 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     env(g, time, accent ? .18 : .11, .001, accent ? .026 : .018, accent ? .028 : .02);
     o.start(time); o.stop(time + (accent ? .07 : .05));
   }
+  function runFillOverlay(absStep, time){
+    const fill = state.fillOverlay;
+    if(!fill) return;
+    const rel = absStep - fill.fromAbs;
+    if(rel < 0) return;
+    if(rel >= fill.length){ state.fillOverlay = null; return; }
+    const chh = state.tracks.findIndex(t => t.type === 'chh');
+    const sd = state.tracks.findIndex(t => t.type === 'sd');
+    const cow = state.tracks.findIndex(t => t.type === 'cow');
+    const ohh = state.tracks.findIndex(t => t.type === 'ohh');
+    if(chh >= 0) trigger(chh, time, 'fill');
+    if(rel >= Math.max(0, fill.length - 4) && rel % 2 === 0 && sd >= 0) trigger(sd, time, 'fill');
+    if(rel === Math.max(0, fill.length - 2) && cow >= 0) trigger(cow, time, 'fill');
+    if(rel === fill.length - 1 && ohh >= 0) trigger(ohh, time, 'fill');
+  }
   function scheduleStep(step, time){
-    state.lastScheduledStep = step;
+    state.lastScheduledAbsStep = step;
+    state.lastScheduledStep = mod(step, state.patternLength);
     syncPageToStep(step);
     state.tracks.forEach((t, i) => {
       if(t.running === false) return;
+      if(!trackStepChanged(t, step)) return;
       if(stepOn(t, step)){
         prepTrack(t, step);
-        if(consumeLiveSkip(i, step, time)) return;
+        if(consumeLiveSkip(i, trackStepIndex(t, step), time)) return;
         trigger(i, time);
       }
     });
+    runFillOverlay(step, time);
     metronome(step, time);
   }
   function paintPlayhead(){
@@ -1003,9 +1035,11 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     const stepDur = 60 / state.bpm / 4;
     const swingOffset = Math.max(0, state.swing - .5) * stepDur;
     while(state.nextNoteTime < audioCtx.currentTime + lookAhead){
-      const when = state.nextNoteTime + (state.playhead % 2 ? swingOffset : 0);
-      scheduleStep(state.playhead, when);
-      state.playhead = (state.playhead + 1) % state.patternLength;
+      const globalCell = mod(state.absolutePlayhead, state.patternLength);
+      const when = state.nextNoteTime + (globalCell % 2 ? swingOffset : 0);
+      scheduleStep(state.absolutePlayhead, when);
+      state.absolutePlayhead += 1;
+      state.playhead = mod(state.absolutePlayhead, state.patternLength);
       state.nextNoteTime += stepDur;
     }
     paintPlayhead();
@@ -1017,8 +1051,11 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     state.playing = true;
     state.tracks.forEach(t => { t.running = true; t.phaseShift = 0; t.holdVisualStep = 0; });
     state.playhead = 0;
+    state.absolutePlayhead = 0;
     state.lastScheduledStep = state.patternLength - 1;
+    state.lastScheduledAbsStep = -1;
     state.pendingLiveSkip = null;
+    state.fillOverlay = null;
     state.transportStartTime = audioCtx.currentTime + .05;
     state.nextNoteTime = state.transportStartTime;
     if(state.patternLength === 32 && state.page !== 0){ state.page = 0; renderAll(); }
@@ -1029,10 +1066,13 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     state.playing = false;
     if(state.timer){ clearInterval(state.timer); state.timer = null; }
     state.playhead = 0;
+    state.absolutePlayhead = 0;
     state.lastScheduledStep = state.patternLength - 1;
+    state.lastScheduledAbsStep = -1;
     state.nextNoteTime = 0;
     state.transportStartTime = 0;
     state.pendingLiveSkip = null;
+    state.fillOverlay = null;
     if(state.patternLength === 32 && state.page !== 0){ state.page = 0; renderAll(); }
     $('transportDisplay').textContent = 'STOP';
     stepEls.flat().forEach(b => b.classList.remove('playing'));
@@ -1163,7 +1203,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
   }
   function setLen(len){
     snapshot();
-    state.patternLength = len; if(len === 16) state.page = 0; state.playhead %= len;
+    state.patternLength = len; if(len === 16) state.page = 0; state.playhead = mod(state.playhead, len);
     state.tracks.forEach(t => {
       t.stepsLen = Math.min(t.stepsLen || len, len);
       t.start = Math.min(t.start || 0, t.stepsLen - 1);
@@ -1172,21 +1212,15 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     renderAll(); save();
   }
   function fill(){
-    snapshot();
-    const len = state.patternLength;
-    const bd = state.tracks.find(t => t.type === 'bd');
-    const sd = state.tracks.find(t => t.type === 'sd');
-    const ch = state.tracks.find(t => t.type === 'chh');
-    const oh = state.tracks.find(t => t.type === 'ohh');
-    const cow = state.tracks.find(t => t.type === 'cow');
-    for(let i = 0; i < len; i++){
-      if(i % 4 === 0) bd.steps[i] = true;
-      if(i % 2 === 0) ch.steps[i] = true;
+    if(!state.playing || !audioCtx){
+      $('trackStatus').textContent = 'FILL wird während laufender Wiedergabe einmalig eingestreut.';
+      return;
     }
-    [4, 12].forEach(i => { if(i < len) sd.steps[i] = true; });
-    if(len > 8 && oh) oh.steps[7] = true;
-    if(len > 12 && cow) cow.steps[10] = true;
-    drawTracks(); save();
+    state.fillOverlay = {
+      fromAbs: currentTransportAbsoluteStep(false) + 1,
+      length: Math.min(8, state.patternLength)
+    };
+    $('trackStatus').textContent = 'FILL wird einmalig eingestreut und verschwindet beim nächsten Durchlauf wieder.';
   }
   function vary(){
     snapshot();
@@ -1205,10 +1239,13 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       if(!state.playing){ t.running = true; t.phaseShift = 0; }
     });
     state.playhead = 0;
+    state.absolutePlayhead = 0;
     state.lastScheduledStep = state.patternLength - 1;
+    state.lastScheduledAbsStep = -1;
     state.nextNoteTime = state.playing && audioCtx ? audioCtx.currentTime + .05 : 0;
     state.transportStartTime = state.playing && audioCtx ? state.nextNoteTime : 0;
     state.pendingLiveSkip = null;
+    state.fillOverlay = null;
     state.sampleTriggerBlockUntil = 0;
     drawTracks(); save();
   }
@@ -1260,7 +1297,9 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     state.undoStack = [];
     state.redoStack = [];
     state.playhead = 0;
+    state.absolutePlayhead = 0;
     state.lastScheduledStep = 0;
+    state.lastScheduledAbsStep = 0;
     state.nextNoteTime = 0;
     state.timer = null;
     state.renderLock = false;
@@ -1269,6 +1308,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
     state.liveRec = false;
     state.transportStartTime = 0;
     state.pendingLiveSkip = null;
+    state.fillOverlay = null;
     state.historyPrimed = false;
     state.historySuspended = false;
     state.tracks = makeFreshTracks();
@@ -1469,7 +1509,13 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       t[prop] = parse(e.target.value);
       clampTrackState(t);
       if(id === 'trackPan') $('panDisplay').textContent = t.pan < -.12 ? 'L' : t.pan > .12 ? 'R' : 'C';
-      if(id === 'trackStart') $('trackStartDisp').textContent = String(t.start + 1).padStart(2, '0');
+      if(id === 'trackStart'){
+        $('trackStartDisp').textContent = String(t.start + 1).padStart(2, '0');
+        if(t.running === false){
+          t.holdVisualStep = clamp(Math.round(t.start || 0), 0, Math.max(0, getTrackLen(t) - 1));
+          drawTracks();
+        }
+      }
       if(id === 'trackTempo'){
         const pct = Math.round((t.tempo - 1) * 100);
         $('trackStatus').textContent = `TMP ${t.tempo.toFixed(2)}× (${pct >= 0 ? '+' : ''}${pct} %) für TRK ${t.code}: ${t.name}`;
@@ -1576,7 +1622,7 @@ input[type=range]:not(.v-range)::-webkit-slider-thumb{
       const t = state.tracks[state.currentTrack];
       snapshot();
       if(state.playing && audioCtx){
-        const currentAbsStep = currentTransportStep(state.patternLength, false);
+        const currentAbsStep = currentTransportAbsoluteStep(false);
         if(t.running === false){
           t.phaseShift = currentAbsStep - (Math.round(t.start || 0) % getTrackLen(t));
           t.running = true;
